@@ -1,95 +1,32 @@
-#!/usr/bin/env python3
-# pylint: disable=missing-any-param-doc,differing-param-doc
-"""Pymodbus Server With Updating Thread.
+from modbus_tcp_server.network import ModbusTCPServer
+from modbus_tcp_server.data_source import BaseDataSource
 
-This is an example of having a background thread updating the
-context while the server is operating. This can also be done with
-a python thread::
+class CustomDB(BaseDataSource):
 
-    from threading import Thread
-    Thread(target=updating_writer, args=(context,)).start()
-"""
-import asyncio
-import logging
+    def __init__(self):
+        self.holding_registers = {1,2,3,4,5}
+        self.coils = {1,1,1,1,1}
 
-from pymodbus.datastore import (
-    ModbusSequentialDataBlock,
-    ModbusServerContext,
-    ModbusSlaveContext,
-)
-from pymodbus.device import ModbusDeviceIdentification
-from pymodbus.server import StartAsyncTcpServer
-from pymodbus.version import version
+    def get_analog_input(self, unit_id: int, address: int) -> int:
+        return 0
 
+    def get_discrete_input(self, unit_id: int, address: int) -> bool:
+        return False
 
-# --------------------------------------------------------------------------- #
-# configure the service logging
-# --------------------------------------------------------------------------- #
-log = logging.getLogger()
-log.setLevel(logging.DEBUG)
+    def get_holding_register(self, unit_id: int, address: int) -> int:
+        return self.holding_registers.get((unit_id, address), 0)
 
-# --------------------------------------------------------------------------- #
-# define your callback process
-# --------------------------------------------------------------------------- #
+    def get_coil(self, unit_id: int, address: int) -> bool:
+        return self.coils.get((unit_id, address), False)
+
+    def set_holding_register(self, unit_id: int, address: int, value: int) -> None:
+        self.holding_registers[(unit_id, address)] = value
+
+    def set_coil(self, unit_id: int, address: int, value: bool) -> None:
+        self.coils[(unit_id, address)] = value
 
 
-def updating_writer(extra):
-    """Run every so often,
+c_db = CustomDB()
 
-    and updates live values of the context. It should be noted
-    that there is a race condition for the update.
-
-    :param arguments: The input arguments to the call
-    """
-    log.debug("updating the context")
-    context = extra[0]
-    register = 3
-    slave_id = 0x00
-    address = 0x10
-    values = context[slave_id].getValues(register, address, count=5)
-    values = [v + 1 for v in values]
-    txt = f"new values: {str(values)}"
-    log.debug(txt)
-    context[slave_id].setValues(register, address, values)
-
-
-async def run_updating_server():
-    """Run updating server."""
-    # ----------------------------------------------------------------------- #
-    # initialize your data store
-    # ----------------------------------------------------------------------- #
-
-    store = ModbusSlaveContext(
-        di=ModbusSequentialDataBlock(0, [17] * 100),
-        co=ModbusSequentialDataBlock(0, [17] * 100),
-        hr=ModbusSequentialDataBlock(0, [17] * 100),
-        ir=ModbusSequentialDataBlock(0, [17] * 100),
-    )
-    context = ModbusServerContext(slaves=store, single=True)
-
-    # ----------------------------------------------------------------------- #
-    # initialize the server information
-    # ----------------------------------------------------------------------- #
-    identity = ModbusDeviceIdentification(
-        info_name={
-            "VendorName": "pymodbus",
-            "ProductCode": "PM",
-            "VendorUrl": "https://github.com/riptideio/pymodbus/",
-            "ProductName": "pymodbus Server",
-            "ModelName": "pymodbus Server",
-            "MajorMinorRevision": version.short(),
-        }
-    )
-
-    # ----------------------------------------------------------------------- #
-    # run the server you want
-    # ----------------------------------------------------------------------- #
-    log.debug("Start server....")
-    await StartAsyncTcpServer(
-        context, identity=identity, address=("localhost", 502), defer_start=False
-    )
-    log.debug("Done")
-
-
-if __name__ == "__main__":
-    asyncio.run(run_updating_server())
+at = ModbusTCPServer('localhost', 502, c_db).start()
+print("Modbus TCP/IP server started")
