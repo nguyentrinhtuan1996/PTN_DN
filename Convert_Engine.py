@@ -41,7 +41,7 @@ class Convent_Engine_Class:
         # Returning the binary string.
         return binary
 
-    def float_to_FP32(self,float_number):
+    def float_to_int16_IEEE(self,float_number):
         """
         convert the float to 2 byte of 32bit within IEE 754 standard
         - float_number : number to 
@@ -114,4 +114,4 @@ class Convent_Engine_Class:
 
         return  result_dictionary
 a = Convent_Engine_Class()
-print(a.float_to_FP32(-2.250003))
+print(a.float_to_int16_IEEE(-2.25000))
