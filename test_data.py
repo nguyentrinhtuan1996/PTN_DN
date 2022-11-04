@@ -14,7 +14,7 @@ Run this as root to listen on TCP priviliged ports (<= 1024).
 import argparse
 from pyModbusTCP.server import ModbusServer, DataBank
 from datetime import datetime
-
+from Convert_Engine import Convent_Engine_Class
 
 class MyDataBank(DataBank):
     """A custom ModbusServerDataBank for override get_holding_registers method."""
@@ -23,13 +23,14 @@ class MyDataBank(DataBank):
         # turn off allocation of memory for standard modbus object types
         # only "holding registers" space will be replaced by dynamic build values.
         super().__init__(virtual_mode=True)
+        self.convert_engine = Convent_Engine_Class()
 
     def get_holding_registers(self, address, number=1, srv_info=None):
         """Get virtual holding registers."""
         # populate virtual registers dict with current datetime values
         now = datetime.now()
-        v_regs_d = {0: now.day, 1: now.month, 2: now.year,
-                    3: now.hour, 4: now.minute, 5: now.second}
+        float_2byte = self.convert_engine.float_to_int16_IEEE(-2.25)
+        v_regs_d = {0: float_2byte["First Byte"], 1: float_2byte["Second Byte"]}
         # build a list of virtual registers to return to server data handler
         # return None if any of virtual registers is missing
         try:
