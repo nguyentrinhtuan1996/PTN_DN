@@ -8,7 +8,7 @@ Map the system date and time to @ 0 to 5 on the "holding registers" space.
 Only the reading of these registers in this address space is authorized. All
 other requests return an illegal data address except.
 
-Run this as root to listen on TCP priviliged ports (<= 1024).
+Run this as root to listen on TCP privileged ports (<= 1024).
 """
 
 import argparse
