@@ -92,16 +92,24 @@ class Modbus_Table_Class():
     TWO_WINDING_DATA_START_HOLDING_REG = SHUNT_DATA_END_HOLDING_REG +1
     TWO_WINDING_DATA_END_HOLDING_REG = TWO_WINDING_DATA_START_HOLDING_REG + QUANTITY_2_WINDING_DATA*7 -1
 
+    BUS_NUMBER = "Bus Number"
+    BUS_NAME = "Bus Name"
+    CODE = "Code"
     
+
     def __init__(self) -> None:
         """
         init tables
         """
         #for CSV input
+        self.discrete_inputs_number = 0
         self.discrete_inputs_table = {}
+        self.input_registers_number = 0
         self.input_registers_table = {}
         #for CSV output
+        self.coils_number = 0
         self.coils_table = {}
+        self.holding_registers_number = 0
         self.holding_registers_table = {}
 
     def set_bus(self,bus_number, bus_name):
@@ -114,6 +122,18 @@ class Modbus_Table_Class():
         - return True if setting successfully
         - return False if failed setting
         """
+        # correct the bus_name
+        if (len(bus_name) >10):
+            bus_name = bus_name[:10]
+        # var to check if this bus number is existing 
+        bus_number_existed = 0
+        for count in range(0, self.input_registers_number+1):
+            if (self.input_registers_table[count]
+        # parsing data into dictionaries
+        self.input_registers_table[1] = {}
+        self.QUAN
+
+        print(self.input_registers_table[1]["bus_name"])
         return True
 
     def set_bus_data(self,
@@ -160,3 +180,8 @@ class Modbus_Table_Class():
         winding_mva_base,
         status):
         pass
+
+# testing
+if __name__ == '__main__':
+    modbus_table =Modbus_Table_Class()
+    modbus_table.set_bus(101,'123456789012')
