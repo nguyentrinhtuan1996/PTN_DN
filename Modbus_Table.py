@@ -190,9 +190,9 @@ class Modbus_Table_Class(Convent_Engine_Class):
                 return True
         # if there is no this bus number
         if (this_bus_number_is_existed == False):
-            # add bus_number
-            bus_number_address = self.BUS_START_INPUT_REG +  self.bus_object_number*11
-            # 
+            # calculate the address
+            bus_number_address = self.BUS_START_INPUT_REG +  self.bus_object_number*self.BUS_FRAME_LENGTH
+            # add bus number
             self.input_registers_table[bus_number_address] = bus_number
             self.holding_registers_table[bus_number_address] = bus_number
             # add bus_name
@@ -233,6 +233,7 @@ class Modbus_Table_Class(Convent_Engine_Class):
             status_address = self.BUS_DATA_START_DISCRETE_INPUT = + count*self.BUS_DATA_FRAME_LENGTH
             # found if this bus data is existed
             if(self.input_registers_table[bus_data_address] == bus_number):
+                
                 self.input_registers_table[bus_data_address +1] = code
                 # for udm
                 udm_dict = self.float_to_int16_IEEE(udm)
@@ -268,7 +269,7 @@ class Modbus_Table_Class(Convent_Engine_Class):
                 self.discrete_inputs_table[status_address] = status
                 self.coils_table[status_address] = status
 
-                pass
+                return True
         
 
     def set_gen_data(self,
