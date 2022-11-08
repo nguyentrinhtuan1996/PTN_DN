@@ -113,5 +113,6 @@ class Convent_Engine_Class:
         result_dictionary["Second Byte"] = int(second_byte_str,2)
 
         return  result_dictionary
-a = Convent_Engine_Class()
-print(a.float_to_int16_IEEE(-2.25000))
+if __name__ == '__main__':
+    convert_engine = Convent_Engine_Class()
+    print(convert_engine.float_to_int16_IEEE(-2.25000))
