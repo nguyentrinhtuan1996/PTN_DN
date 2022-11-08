@@ -159,11 +159,14 @@ class Modbus_Table_Class():
             # found weather this bus number is existing 
             if(self.input_registers_table[bus_number_address] == bus_number):
                 # read bus_name from modbus table
-                count1 = 0
-                for letter_in_bus_name in bus_name:
-                    count1 =+1
-                    self.input_registers_table[bus_number_address + count1] = ord(letter_in_bus_name)
+                # bus_name_list = list(bus_number)
+                for count1 in range(0,self.BUS_NAME_MAX_LENGTH):
+                    if (count1 < len(bus_name)):
+                        self.input_registers_table[bus_number_address + count1 +1] = ord(bus_name[count1])
+                    else:
+                        self.input_registers_table[bus_number_address + count1 +1] = 0
 
+                print(self.input_registers_table)
                 return True
         # if there is no this bus number
         self.input_registers_table.append(bus_number)
@@ -172,6 +175,8 @@ class Modbus_Table_Class():
             self.input_registers_table.append(ord(bus_name[count2]))
         for count3 in range(len(bus_name),10):
             self.input_registers_table.append(0)
+
+        self.Bus_object_number +=1
         print(self.input_registers_table)
         return True
 
@@ -225,6 +230,11 @@ class Modbus_Table_Class():
 # print(array_X[1])
 if __name__ == '__main__':
     modbus_table =Modbus_Table_Class()
-    modbus_table.set_bus(101,'abcaa123123123')
+    modbus_table.set_bus(101,'123')
+    modbus_table.set_bus(102,'njna')
+    modbus_table.set_bus(103,'njna1asdasd')
+    modbus_table.set_bus(101,'123')
+    modbus_table.set_bus(102,'123asdaad')
     print(modbus_table.get_bus_name(101))
-    # print(chr(64))
+    print(modbus_table.get_bus_name(102))
+    # print(chr(98))
