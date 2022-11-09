@@ -27,28 +27,29 @@ class Modbus_Table_Class(Convent_Engine_Class):
 
 
     BUS_START_INPUT_REG = 0
-    BUS_END_INPUT_REG   = QUANTITY_BUS*(BUS_NAME_MAX_LENGTH + 1) - 1
+    BUS_END_INPUT_REG   = QUANTITY_BUS*BUS_FRAME_LENGTH - 1
 
     BUS_START_HOLDING_REG = 0
-    BUS_END_HOLDING_REG = QUANTITY_BUS*(BUS_NAME_MAX_LENGTH + 1) - 1
+    BUS_END_HOLDING_REG = QUANTITY_BUS*BUS_FRAME_LENGTH - 1
     
     # for bus data object ( 12 x 2 bytes) quantity 100
     bus_data_object_number = 0
     BUS_DATA_FRAME_LENGTH = 12
 
     BUS_DATA_START_DISCRETE_INPUT = 0
-    BUS_DATA_END_DISCRETE_INPUT = QUANTITY_BUS_DATA*1 -1
+    BUS_DATA_END_DISCRETE_INPUT = QUANTITY_BUS_DATA -1
 
     BUS_DATA_START_INPUT_REG = BUS_END_INPUT_REG + 1
-    BUS_DATA_END_INPUT_REG = BUS_DATA_START_INPUT_REG + QUANTITY_BUS_DATA*12 - 1
+    BUS_DATA_END_INPUT_REG = BUS_DATA_START_INPUT_REG + QUANTITY_BUS_DATA*BUS_DATA_FRAME_LENGTH - 1
 
     BUS_DATA_START_COIL = 0
-    BUS_DATA_END_COIL = QUANTITY_BUS_DATA*1 -1
+    BUS_DATA_END_COIL = QUANTITY_BUS_DATA -1
 
     BUS_DATA_START_HOLDING_REG = BUS_END_HOLDING_REG + 1
-    BUS_DATA_END_HOLDING_REG = BUS_DATA_START_HOLDING_REG + QUANTITY_BUS_DATA*12 - 1
+    BUS_DATA_END_HOLDING_REG = BUS_DATA_START_HOLDING_REG + QUANTITY_BUS_DATA*BUS_DATA_FRAME_LENGTH - 1
 
     #  for gen data object (13 X 2 bytes)
+
     GEN_DATA_START_DISCRETE_INPUT = BUS_DATA_END_DISCRETE_INPUT +1 
     GEN_DATA_END_DISCRETE_INPUT = GEN_DATA_START_DISCRETE_INPUT + QUANTITY_GEN_DATA*1 -1 
 
@@ -123,16 +124,16 @@ class Modbus_Table_Class(Convent_Engine_Class):
         # init modbus table
         # discrete_inputs_table
         for count in range(0, self.TWO_WINDING_DATA_END_DISCRETE_INPUT +1):
-            self.discrete_inputs_table.append(0)
+            self.discrete_inputs_table.append(None)
         # for input register
         for count in range(0, self.TWO_WINDING_DATA_END_INPUT_REG +1):
-            self.input_registers_table.append(0)
+            self.input_registers_table.append(None)
         # for coils table
         for count in range(0, self.TWO_WINGDING_DATA_END_COIL +1):
-            self.coils_table.append(0)
+            self.coils_table.append(None)
         # for holding register 
         for count in range(0, self.TWO_WINDING_DATA_END_HOLDING_REG +1):
-            self.holding_registers_table.append(0)
+            self.holding_registers_table.append(None)
         
         # print("Length of discrete input table :" + str(len(self.discrete_inputs_table)))
 
@@ -145,13 +146,13 @@ class Modbus_Table_Class(Convent_Engine_Class):
         """
         for count in range (0, self.QUANTITY_BUS):
             # calculate the address of bus number
-            bus_number_address = self.BUS_START_INPUT_REG + count*11
+            bus_number_address = self.BUS_START_HOLDING_REG + count*self.BUS_FRAME_LENGTH
             # found weather this bus number is existing 
-            if(self.input_registers_table[bus_number_address] == bus_number):
+            if(self.holding_registers_table[bus_number_address] == bus_number):
                 bus_name = ''
                 # read bus_name from modbus table
                 for count1 in range(1,self.BUS_NAME_MAX_LENGTH +1):
-                    bus_name = bus_name + chr((self.input_registers_table[bus_number_address + count1]))
+                    bus_name = bus_name + chr((self.holding_registers_table[bus_number_address + count1]))
                 return bus_name
         # this bus number is not existing
         return False
@@ -170,7 +171,7 @@ class Modbus_Table_Class(Convent_Engine_Class):
         if (len(bus_name) >10):
             bus_name = bus_name[:10]
         # var to check if this bus number is existing 
-        this_bus_number_is_existed = False
+        
         for count in range (0, self.bus_object_number):
             # calculate the address of bus number
             bus_number_address = self.BUS_START_INPUT_REG + count*self.BUS_FRAME_LENGTH
@@ -189,16 +190,20 @@ class Modbus_Table_Class(Convent_Engine_Class):
                 # print(self.input_registers_table)
                 return True
         # if there is no this bus number
-        if (this_bus_number_is_existed == False):
-            # calculate the address
-            bus_number_address = self.BUS_START_INPUT_REG +  self.bus_object_number*self.BUS_FRAME_LENGTH
-            # add bus number
-            self.input_registers_table[bus_number_address] = bus_number
-            self.holding_registers_table[bus_number_address] = bus_number
-            # add bus_name
-            for count2 in range(0,len(bus_name)):
-                self.input_registers_table[bus_number_address + count2 + 1] = ord(bus_name[count2])
-                self.holding_registers_table[bus_number_address + count2 + 1] = ord(bus_name[count2])
+        
+        # calculate the address
+        bus_number_address = self.BUS_START_INPUT_REG +  self.bus_object_number*self.BUS_FRAME_LENGTH
+        # add bus number
+        self.input_registers_table[bus_number_address] = bus_number
+        self.holding_registers_table[bus_number_address] = bus_number
+        # add bus_name
+        for count1 in range(0,self.BUS_NAME_MAX_LENGTH):
+            if (count1 < len(bus_name)):
+                self.input_registers_table[bus_number_address + count1 +1] = ord(bus_name[count1])
+                self.holding_registers_table[bus_number_address + count1 +1] = ord(bus_name[count1])
+            else:
+                self.input_registers_table[bus_number_address + count1 +1] = 0
+                self.holding_registers_table[bus_number_address + count1 +1] = 0
 
         self.bus_object_number +=1
         # print(self.input_registers_table)
@@ -230,11 +235,13 @@ class Modbus_Table_Class(Convent_Engine_Class):
         for count in range(0, self.bus_data_object_number):
             #  calculate the address of bus data
             bus_data_address = self.BUS_DATA_START_INPUT_REG + count*self.BUS_DATA_FRAME_LENGTH
-            status_address = self.BUS_DATA_START_DISCRETE_INPUT = + count*self.BUS_DATA_FRAME_LENGTH
+            status_address = self.BUS_DATA_START_DISCRETE_INPUT + count*self.BUS_DATA_FRAME_LENGTH
             # found if this bus data is existed
             if(self.input_registers_table[bus_data_address] == bus_number):
                 
+                # add code
                 self.input_registers_table[bus_data_address +1] = code
+                self.holding_registers_table[bus_data_address +1] = code
                 # for udm
                 udm_dict = self.float_to_int16_IEEE(udm)
                 self.input_registers_table[bus_data_address +2] = udm_dict["First Byte"]
@@ -271,6 +278,54 @@ class Modbus_Table_Class(Convent_Engine_Class):
 
                 return True
         
+        # if there is no this bus_number 
+        # calculate the address
+        bus_data_address = self.BUS_DATA_END_INPUT_REG + self.bus_data_object_number*self.BUS_DATA_FRAME_LENGTH
+        status_address = self.BUS_DATA_START_DISCRETE_INPUT  + self.bus_data_object_number*self.BUS_DATA_FRAME_LENGTH
+
+        # add bus_number
+        self.input_registers_table[bus_data_address] = bus_number
+        self.holding_registers_table[bus_data_address] = bus_number
+        # add code
+        self.input_registers_table[bus_data_address +1] = code
+        self.holding_registers_table[bus_data_address +1] = code
+        # for udm
+        udm_dict = self.float_to_int16_IEEE(udm)
+        self.input_registers_table[bus_data_address +2] = udm_dict["First Byte"]
+        self.input_registers_table[bus_data_address +3] = udm_dict["Second Byte"]
+        self.holding_registers_table[bus_data_address +2] = udm_dict["First Byte"]
+        self.holding_registers_table[bus_data_address +3] = udm_dict["Second Byte"]
+        #  for normal
+        normal_dict = self.float_to_int16_IEEE(normal)
+        self.input_registers_table[bus_data_address +4] = normal_dict["First Byte"]
+        self.input_registers_table[bus_data_address +5] = normal_dict["Second Byte"]
+        self.holding_registers_table[bus_data_address +4] = normal_dict["First Byte"]
+        self.holding_registers_table[bus_data_address +5] = normal_dict["Second Byte"]
+        #  for normal_vmin
+        normal_vmin_dict = self.float_to_int16_IEEE(normal_vmin)
+        self.input_registers_table[bus_data_address +6] = normal_vmin_dict["First Byte"]
+        self.input_registers_table[bus_data_address +7] = normal_vmin_dict["Second Byte"]
+        self.holding_registers_table[bus_data_address +6] = normal_vmin_dict["First Byte"]
+        self.holding_registers_table[bus_data_address +7] = normal_vmin_dict["Second Byte"]
+        # for normal_vmax 
+        normal_vmax_dict = self.float_to_int16_IEEE(normal_vmax)
+        self.input_registers_table[bus_data_address +8] = normal_vmax_dict["First Byte"]
+        self.input_registers_table[bus_data_address +9] = normal_vmax_dict["Second Byte"]
+        self.holding_registers_table[bus_data_address +8] = normal_vmax_dict["First Byte"]
+        self.holding_registers_table[bus_data_address +9] = normal_vmax_dict["Second Byte"]
+        #  for emergency_vmax
+        emergency_vmax_dict = self.float_to_int16_IEEE(emergency_vmax)
+        self.input_registers_table[bus_data_address +10] = emergency_vmax_dict["First Byte"]
+        self.input_registers_table[bus_data_address +11] = emergency_vmax_dict["Second Byte"]
+        self.holding_registers_table[bus_data_address +10] = emergency_vmax_dict["First Byte"]
+        self.holding_registers_table[bus_data_address +11] = emergency_vmax_dict["Second Byte"]
+        # for status
+        self.discrete_inputs_table[status_address] = status
+        self.coils_table[status_address] = status
+
+        #  increase bus data object number
+        self.bus_data_object_number +=1
+        return True
 
     def set_gen_data(self,
         bus_number,
@@ -305,17 +360,37 @@ class Modbus_Table_Class(Convent_Engine_Class):
         winding_mva_base,
         status):
         pass
+    def print_modbus_table(self):
+        # print discrete input table
+        for count in range(0,len(self.discrete_inputs_table)):
+            if (self.discrete_inputs_table[count] !=None):
+                print("Discrete input [{index}]:{value}".format( index = count, value = self.discrete_inputs_table[count]))
+        # print input register table
+        for count in range(0,len(self.input_registers_table)):
+            if (self.input_registers_table[count] !=None):
+                print("Input register [{index}]:{value}".format( index = count, value = self.input_registers_table[count]))
+        # print coil table
+        for count in range(0,len(self.coils_table)):
+            if (self.coils_table[count] !=None):
+                print("Coil [{index}]:{value}".format( index = count, value = self.coils_table[count]))
+        # print holding register table
+        for count in range(0,len(self.holding_registers_table)):
+            if (self.holding_registers_table[count] !=None):
+                print("Holding register [{index}]:{value}".format( index = count, value = self.holding_registers_table[count]))
 
 
 if __name__ == '__main__':
     modbus_table =Modbus_Table_Class()
-    # modbus_table.set_bus(101,'123345')
+    modbus_table.set_bus(101,'123345')
+    modbus_table.set_bus_data(101,1,2,3,4,5,6,0)
+    modbus_table.print_modbus_table()
+    print(len(modbus_table.input_registers_table))
     # modbus_table.set_bus(101,'123')
     # modbus_table.set_bus(102,'njna')
 
 #     modbus_table.set_bus(103,'njna1asdasd')
 #     modbus_table.set_bus(101,'123')
 #     modbus_table.set_bus(102,'123asdaad')
-    # print(modbus_table.get_bus_name(101))
+    print(modbus_table.get_bus_name(101))
     # print(modbus_table.get_bus_name(102))
 #     # print(chr(98))

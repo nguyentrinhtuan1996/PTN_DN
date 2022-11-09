@@ -79,7 +79,7 @@ class Convent_Engine_Class:
         # Bit was high for the first
         # Time in binary repress
         # of Integer part of real no.
-        ind = int_str.index('1')
+        ind = int_str.find("1")
 
         # The Exponent is the no.
         # By which we have right
