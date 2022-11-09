@@ -49,22 +49,24 @@ class Modbus_Table_Class(Convent_Engine_Class):
     BUS_DATA_END_HOLDING_REG = BUS_DATA_START_HOLDING_REG + QUANTITY_BUS_DATA*BUS_DATA_FRAME_LENGTH - 1
 
     #  for gen data object (13 X 2 bytes)
+    gen_data_object_number = 0
+    GEN_DATA_FRAME_LENGTH = 6
 
     GEN_DATA_START_DISCRETE_INPUT = BUS_DATA_END_DISCRETE_INPUT +1 
-    GEN_DATA_END_DISCRETE_INPUT = GEN_DATA_START_DISCRETE_INPUT + QUANTITY_GEN_DATA*1 -1 
+    GEN_DATA_END_DISCRETE_INPUT = GEN_DATA_START_DISCRETE_INPUT + QUANTITY_GEN_DATA -1 
 
     GEN_DATA_START_INPUT_REG = BUS_DATA_END_INPUT_REG +1
-    GEN_DATE_END_INPUT_REG = GEN_DATA_START_INPUT_REG + QUANTITY_GEN_DATA*5 -1
+    GEN_DATE_END_INPUT_REG = GEN_DATA_START_INPUT_REG + QUANTITY_GEN_DATA*GEN_DATA_FRAME_LENGTH -1
 
     GEN_DATA_START_COIL = BUS_DATA_END_COIL +1
     GEN_DATA_END_COIL = GEN_DATA_START_COIL + QUANTITY_GEN_DATA*1 -1
 
     GEN_DATA_START_HOLDING_REG = BUS_DATA_END_HOLDING_REG +1
-    GEN_DATA_END_HOLDING_REG = GEN_DATA_START_HOLDING_REG + QUANTITY_GEN_DATA*5 -1
+    GEN_DATA_END_HOLDING_REG = GEN_DATA_START_HOLDING_REG + QUANTITY_GEN_DATA*GEN_DATA_FRAME_LENGTH -1
 
     # for line data object
     LINE_DATA_START_DISCRETE_INPUT = GEN_DATA_END_DISCRETE_INPUT +1
-    LINE_DATA_END_DISCRETE_INPUT = LINE_DATA_START_DISCRETE_INPUT + QUANTITY_LINE_DATA*1 -1
+    LINE_DATA_END_DISCRETE_INPUT = LINE_DATA_START_DISCRETE_INPUT + QUANTITY_LINE_DATA -1
 
     LINE_DATA_START_INPUT_REG = GEN_DATE_END_INPUT_REG +1
     LINE_DATA_END_INPUT_REG = LINE_DATA_START_INPUT_REG + QUANTITY_LINE_DATA*13 -1
@@ -76,6 +78,9 @@ class Modbus_Table_Class(Convent_Engine_Class):
     LINE_DATA_END_HOLDING_REG = LINE_DATA_START_HOLDING_REG + QUANTITY_LINE_DATA*13 -1
 
     # for shunt data object
+    shunt_data_object_number = 0
+    SHUNT_DATA_FRAME_LENGTH = 5
+
     SHUNT_DATA_START_DISCRETE_INPUT = LINE_DATA_END_DISCRETE_INPUT +1
     SHUNT_DATA_END_DISCRETE_INPUT = SHUNT_DATA_START_DISCRETE_INPUT + QUANTITY_SHUNT_DATA*1 -1
 
@@ -135,8 +140,6 @@ class Modbus_Table_Class(Convent_Engine_Class):
         for count in range(0, self.TWO_WINDING_DATA_END_HOLDING_REG +1):
             self.holding_registers_table.append(None)
         
-        # print("Length of discrete input table :" + str(len(self.discrete_inputs_table)))
-
     def get_bus_name(self, bus_number):
         """
         get the bus name that is store in to bus number
@@ -230,7 +233,7 @@ class Modbus_Table_Class(Convent_Engine_Class):
         - status : bool
         """
         #  var to check this bus data is existed 
-        this_bus_data_is_existed = False
+        
         # find to check
         for count in range(0, self.bus_data_object_number):
             #  calculate the address of bus data
@@ -239,7 +242,7 @@ class Modbus_Table_Class(Convent_Engine_Class):
             # found if this bus data is existed
             if(self.input_registers_table[bus_data_address] == bus_number):
                 
-                # add code
+                # for code
                 self.input_registers_table[bus_data_address +1] = code
                 self.holding_registers_table[bus_data_address +1] = code
                 # for udm
@@ -333,7 +336,66 @@ class Modbus_Table_Class(Convent_Engine_Class):
         pgen,
         qgen,
         status):
-        pass
+        """
+        Set gen data with :
+        - bus_number : int16
+        - unit : float
+        - pgen : float
+        - qgen : float
+        - status: bool
+        """
+        for count in range(0, self.gen_data_object_number):
+            #  calculate the address of gen data
+            gen_data_address = self.GEN_DATA_START_INPUT_REG + count*self.GEN_DATA_FRAME_LENGTH
+            status_address = self.GEN_DATA_START_DISCRETE_INPUT + count*self.GEN_DATA_FRAME_LENGTH
+            if(self.input_registers_table[gen_data_address] == bus_number):
+                # change unit
+                self.input_registers_table[gen_data_address +1] = unit
+                # change pgen
+                pgen_dict = self.float_to_int16_IEEE(pgen)
+                self.input_registers_table[gen_data_address +2] = pgen_dict["First Byte"]
+                self.input_registers_table[gen_data_address +3] = pgen_dict["Second Byte"]
+                self.holding_registers_table[gen_data_address +2] = pgen_dict["First Byte"]
+                self.holding_registers_number[gen_data_address +3] = pgen_dict["Second Byte"]
+                # change the qgen
+                qgen_dict = self.float_to_int16_IEEE(qgen)
+                self.input_registers_table[gen_data_address +4] = qgen_dict["First Byte"]
+                self.input_registers_table[gen_data_address +5] = qgen_dict["Second Byte"]
+                self.holding_registers_table[gen_data_address +4] = qgen_dict["First Byte"]
+                self.holding_registers_table[gen_data_address +5] = qgen_dict["Second Byte"]
+                #  change status
+                self.discrete_inputs_table[status_address] = status
+                self.coils_table[status_address] = status
+
+                return True
+        
+        # if there is no this gen_data
+        #  calculate the address
+        gen_data_address = self.GEN_DATA_START_INPUT_REG + self.gen_data_object_number*self.GEN_DATA_FRAME_LENGTH
+        status_address = self.GEN_DATA_START_DISCRETE_INPUT + self.gen_data_object_number*self.GEN_DATA_FRAME_LENGTH
+
+        # add bus_number
+        self.input_registers_table[gen_data_address] = bus_number
+        # add unit
+        self.input_registers_table[gen_data_address +1] = unit
+        # add pgen
+        pgen_dict = self.float_to_int16_IEEE(pgen)
+        self.input_registers_table[gen_data_address +2] = pgen_dict["First Byte"]
+        self.input_registers_table[gen_data_address +3] = pgen_dict["Second Byte"]
+        self.holding_registers_table[gen_data_address +2] = pgen_dict["First Byte"]
+        self.holding_registers_number[gen_data_address +3] = pgen_dict["Second Byte"]
+        # add the qgen
+        qgen_dict = self.float_to_int16_IEEE(qgen)
+        self.input_registers_table[gen_data_address +4] = qgen_dict["First Byte"]
+        self.input_registers_table[gen_data_address +5] = qgen_dict["Second Byte"]
+        self.holding_registers_table[gen_data_address +4] = qgen_dict["First Byte"]
+        self.holding_registers_table[gen_data_address +5] = qgen_dict["Second Byte"]
+        #  add status
+        self.discrete_inputs_table[status_address] = status
+        self.coils_table[status_address] = status
+        #  increase the the object number
+        self.gen_data_object_number +=1
+        return True
 
     def set_line_data(self,
         from_bus_number,
@@ -350,7 +412,61 @@ class Modbus_Table_Class(Convent_Engine_Class):
         g_shunt,
         b_shunt,
         status):
-        pass
+        """
+        Set a shunt data with arguments:
+        - bus_number : in16
+        - g_shunt : float
+        - b_shunt : float
+        - status : bool
+        """
+        for count in range(0, self.shunt_data_object_number):
+            #  calculate the address
+            shunt_data_address = self.SHUNT_DATA_START_INPUT_REG + count*self.SHUNT_DATA_FRAME_LENGTH
+            status_address = self.SHUNT_DATA_END_DISCRETE_INPUT + count*self.SHUNT_DATA_FRAME_LENGTH
+            # found if this shunt data is existed
+            if(self.input_registers_table[shunt_data_address] == bus_number):
+                #  change the g_shunt
+                g_shunt_dict = self.float_to_int16_IEEE(g_shunt)
+                self.input_registers_table[shunt_data_address +1] = g_shunt_dict["First Byte"]
+                self.input_registers_table[shunt_data_address +2] = g_shunt_dict["Second Byte"]
+                self.holding_registers_table[shunt_data_address +1] = g_shunt_dict["First Byte"]
+                self.holding_registers_table[shunt_data_address +2] = g_shunt_dict["Second Byte"]
+                #  change b_shunt
+                b_shunt_dict = self.float_to_int16_IEEE(b_shunt)
+                self.input_registers_table[shunt_data_address +3] = b_shunt_dict["First Byte"]
+                self.input_registers_table[shunt_data_address +4] = b_shunt_dict["Second Byte"]
+                self.holding_registers_table[shunt_data_address +3] = b_shunt_dict["First Byte"]
+                self.holding_registers_table[shunt_data_address +4] = b_shunt_dict["Second Byte"]
+                # change status
+                self.discrete_inputs_table[status_address] = status
+                self.coils_table[status_address] = status
+
+                return True
+        
+        # if there is no this shunt data
+        # calculate address
+        shunt_data_address = self.SHUNT_DATA_START_INPUT_REG + self.shunt_data_object_number*self.SHUNT_DATA_FRAME_LENGTH
+        status_address = self.SHUNT_DATA_END_DISCRETE_INPUT + self.shunt_data_object_number*self.SHUNT_DATA_FRAME_LENGTH
+        # add bus_number
+        self.input_registers_table[shunt_data_address] = bus_number
+        #  add the g_shunt
+        g_shunt_dict = self.float_to_int16_IEEE(g_shunt)
+        self.input_registers_table[shunt_data_address +1] = g_shunt_dict["First Byte"]
+        self.input_registers_table[shunt_data_address +2] = g_shunt_dict["Second Byte"]
+        self.holding_registers_table[shunt_data_address +1] = g_shunt_dict["First Byte"]
+        self.holding_registers_table[shunt_data_address +2] = g_shunt_dict["Second Byte"]
+        #  add b_shunt
+        b_shunt_dict = self.float_to_int16_IEEE(b_shunt)
+        self.input_registers_table[shunt_data_address +3] = b_shunt_dict["First Byte"]
+        self.input_registers_table[shunt_data_address +4] = b_shunt_dict["Second Byte"]
+        self.holding_registers_table[shunt_data_address +3] = b_shunt_dict["First Byte"]
+        self.holding_registers_table[shunt_data_address +4] = b_shunt_dict["Second Byte"]
+        # add status
+        self.discrete_inputs_table[status_address] = status
+        self.coils_table[status_address] = status
+        #  increase the shunt data object 
+        self.shunt_data_object_number +=1
+        return True
 
     def set_2_winding_data(self,
         from_bus_number,
@@ -360,6 +476,7 @@ class Modbus_Table_Class(Convent_Engine_Class):
         winding_mva_base,
         status):
         pass
+    
     def print_modbus_table(self):
         # print discrete input table
         for count in range(0,len(self.discrete_inputs_table)):
