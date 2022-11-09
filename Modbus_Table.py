@@ -65,17 +65,20 @@ class Modbus_Table_Class(Convent_Engine_Class):
     GEN_DATA_END_HOLDING_REG = GEN_DATA_START_HOLDING_REG + QUANTITY_GEN_DATA*GEN_DATA_FRAME_LENGTH -1
 
     # for line data object
+    line_data_object_number = 0
+    LINE_DATA_FRAME_LENGTH = 13
+
     LINE_DATA_START_DISCRETE_INPUT = GEN_DATA_END_DISCRETE_INPUT +1
     LINE_DATA_END_DISCRETE_INPUT = LINE_DATA_START_DISCRETE_INPUT + QUANTITY_LINE_DATA -1
 
     LINE_DATA_START_INPUT_REG = GEN_DATE_END_INPUT_REG +1
-    LINE_DATA_END_INPUT_REG = LINE_DATA_START_INPUT_REG + QUANTITY_LINE_DATA*13 -1
+    LINE_DATA_END_INPUT_REG = LINE_DATA_START_INPUT_REG + QUANTITY_LINE_DATA*LINE_DATA_FRAME_LENGTH -1
 
     LINE_DATA_START_COIL = GEN_DATA_END_COIL +1
     LINE_DATA_END_COIL = LINE_DATA_START_COIL + QUANTITY_LINE_DATA*1 -1
 
     LINE_DATA_START_HOLDING_REG = GEN_DATA_END_HOLDING_REG +1
-    LINE_DATA_END_HOLDING_REG = LINE_DATA_START_HOLDING_REG + QUANTITY_LINE_DATA*13 -1
+    LINE_DATA_END_HOLDING_REG = LINE_DATA_START_HOLDING_REG + QUANTITY_LINE_DATA*LINE_DATA_FRAME_LENGTH -1
 
     # for shunt data object
     shunt_data_object_number = 0
@@ -85,26 +88,29 @@ class Modbus_Table_Class(Convent_Engine_Class):
     SHUNT_DATA_END_DISCRETE_INPUT = SHUNT_DATA_START_DISCRETE_INPUT + QUANTITY_SHUNT_DATA*1 -1
 
     SHUNT_DATA_START_INPUT_REG = LINE_DATA_END_INPUT_REG +1
-    SHUNT_DATA_END_INPUT_REG = SHUNT_DATA_START_INPUT_REG + QUANTITY_SHUNT_DATA*3 -1
+    SHUNT_DATA_END_INPUT_REG = SHUNT_DATA_START_INPUT_REG + QUANTITY_SHUNT_DATA*SHUNT_DATA_FRAME_LENGTH -1
 
     SHUNT_DATA_START_COIL = LINE_DATA_END_COIL +1
     SHUNT_DATA_END_COIL = SHUNT_DATA_START_COIL + QUANTITY_SHUNT_DATA*1 -1
 
     SHUNT_DATA_START_HOLDING_REG = LINE_DATA_END_HOLDING_REG +1
-    SHUNT_DATA_END_HOLDING_REG = SHUNT_DATA_START_HOLDING_REG + QUANTITY_SHUNT_DATA*3 -1
+    SHUNT_DATA_END_HOLDING_REG = SHUNT_DATA_START_HOLDING_REG + QUANTITY_SHUNT_DATA*SHUNT_DATA_FRAME_LENGTH -1
 
     # for 2 winding data
+    two_winding_data_object_number = 0
+    TWO_WINDING_DATA_FRAME_LENGTH = 7 
+    
     TWO_WINDING_DATA_START_DISCRETE_INPUT = SHUNT_DATA_END_DISCRETE_INPUT +1
-    TWO_WINDING_DATA_END_DISCRETE_INPUT = TWO_WINDING_DATA_START_DISCRETE_INPUT + QUANTITY_2_WINDING_DATA*1 -1 
+    TWO_WINDING_DATA_END_DISCRETE_INPUT = TWO_WINDING_DATA_START_DISCRETE_INPUT + QUANTITY_2_WINDING_DATA -1 
 
     TWO_WINDING_DATA_START_INPUT_REG = SHUNT_DATA_END_INPUT_REG +1
-    TWO_WINDING_DATA_END_INPUT_REG = TWO_WINDING_DATA_START_INPUT_REG + QUANTITY_2_WINDING_DATA*7 -1
+    TWO_WINDING_DATA_END_INPUT_REG = TWO_WINDING_DATA_START_INPUT_REG + QUANTITY_2_WINDING_DATA*TWO_WINDING_DATA_FRAME_LENGTH -1
 
     TWO_WINGDING_DATA_START_COIL = SHUNT_DATA_END_COIL +1
-    TWO_WINGDING_DATA_END_COIL = TWO_WINGDING_DATA_START_COIL + QUANTITY_2_WINDING_DATA*1 -1
+    TWO_WINGDING_DATA_END_COIL = TWO_WINGDING_DATA_START_COIL + QUANTITY_2_WINDING_DATA -1
 
     TWO_WINDING_DATA_START_HOLDING_REG = SHUNT_DATA_END_HOLDING_REG +1
-    TWO_WINDING_DATA_END_HOLDING_REG = TWO_WINDING_DATA_START_HOLDING_REG + QUANTITY_2_WINDING_DATA*7 -1
+    TWO_WINDING_DATA_END_HOLDING_REG = TWO_WINDING_DATA_START_HOLDING_REG + QUANTITY_2_WINDING_DATA*TWO_WINDING_DATA_FRAME_LENGTH -1
 
     BUS_NUMBER = "Bus Number"
     BUS_NAME = "Bus Name"
@@ -348,6 +354,7 @@ class Modbus_Table_Class(Convent_Engine_Class):
             #  calculate the address of gen data
             gen_data_address = self.GEN_DATA_START_INPUT_REG + count*self.GEN_DATA_FRAME_LENGTH
             status_address = self.GEN_DATA_START_DISCRETE_INPUT + count*self.GEN_DATA_FRAME_LENGTH
+            #  find this gen data
             if(self.input_registers_table[gen_data_address] == bus_number):
                 # change unit
                 self.input_registers_table[gen_data_address +1] = unit
@@ -400,12 +407,110 @@ class Modbus_Table_Class(Convent_Engine_Class):
     def set_line_data(self,
         from_bus_number,
         to_bus_number,
-        id,
-        imax,
-        r,
-        x,
-        g):
-        pass
+        ID,
+        Imax,
+        Rpu,
+        Xpu,
+        Gpu,
+        Bpu,
+        status):
+        """
+        set a line data with arguments:
+        - from_bus_number : int16
+        - to_bus_number : int16
+        - ID,...
+        """
+        for count in range(0, self.line_data_object_number):
+            #  calculate addresses
+            line_data_address = self.LINE_DATA_START_INPUT_REG + count*self.LINE_DATA_FRAME_LENGTH
+            status_address = self.LINE_DATA_START_DISCRETE_INPUT + count*self.LINE_DATA_FRAME_LENGTH
+            # find this line data
+            if(self.input_registers_table[line_data_address] == from_bus_number):
+                if(self.input_registers_table[line_data_address +1] == to_bus_number):
+                    # change ID
+                    self.input_registers_table[line_data_address +2] = ID
+                    # change Imax
+                    Imax_dict = self.float_to_int16_IEEE(Imax)
+                    self.input_registers_table[line_data_address +3] = Imax_dict["First Byte"]
+                    self.input_registers_table[line_data_address +4] = Imax_dict["Second Byte"]
+                    self.holding_registers_table[line_data_address +3] = Imax_dict["First Byte"]
+                    self.holding_registers_table[line_data_address +4] = Imax_dict["Second Byte"]
+                    # change Rpu
+                    Rpu_dict = self.float_to_int16_IEEE(Rpu)
+                    self.input_registers_table[line_data_address +5] = Rpu_dict["First Byte"]
+                    self.input_registers_table[line_data_address +6] = Rpu_dict["Second Byte"]
+                    self.holding_registers_table[line_data_address +5] = Rpu_dict["First Byte"]
+                    self.holding_registers_table[line_data_address +6] = Rpu_dict["Second Byte"]
+                    # change Xpu
+                    Xpu_dict = self.float_to_int16_IEEE(Xpu)
+                    self.input_registers_table[line_data_address +7] = Xpu_dict["First Byte"]
+                    self.input_registers_table[line_data_address +8] = Xpu_dict["Second Byte"]
+                    self.holding_registers_table[line_data_address +7] = Xpu_dict["First Byte"]
+                    self.holding_registers_table[line_data_address +8] = Xpu_dict["Second Byte"]
+                    # change Gpu
+                    Gpu_dict = self.float_to_int16_IEEE(Gpu)
+                    self.input_registers_table[line_data_address +9] = Gpu_dict["First Byte"]
+                    self.input_registers_table[line_data_address +10] = Gpu_dict["Second Byte"]
+                    self.holding_registers_table[line_data_address +9] = Gpu_dict["First Byte"]
+                    self.holding_registers_table[line_data_address +10] = Gpu_dict["Second Byte"]
+                    # change Bpu
+                    Bpu_dict = self.float_to_int16_IEEE(Bpu)
+                    self.input_registers_number[line_data_address +11] = Bpu_dict["First Byte"]
+                    self.input_registers_number[line_data_address +12] = Bpu_dict["Second Byte"]
+                    self.holding_registers_table[line_data_address +11] = Bpu_dict["First Byte"]
+                    self.holding_registers_table[line_data_address +12] = Bpu_dict["Second Byte"]
+                    #  change status
+                    self.discrete_inputs_table[status_address] = status
+                    self.coils_table[status_address] = status
+
+                    return True
+        # if there is no this line data
+        #  calculate the address
+        line_data_address = self.LINE_DATA_START_INPUT_REG + self.line_data_object_number*self.LINE_DATA_FRAME_LENGTH
+        status_address = self.LINE_DATA_START_DISCRETE_INPUT + self.line_data_object_number*self.LINE_DATA_FRAME_LENGTH
+        # add from_bus_number
+        self.input_registers_number[line_data_address] = from_bus_number
+        # add to_bus_number
+        self.input_registers_number[line_data_address +1] = to_bus_number
+        # add ID
+        self.input_registers_table[line_data_address +2] = ID
+        # add Imax
+        Imax_dict = self.float_to_int16_IEEE(Imax)
+        self.input_registers_table[line_data_address +3] = Imax_dict["First Byte"]
+        self.input_registers_table[line_data_address +4] = Imax_dict["Second Byte"]
+        self.holding_registers_table[line_data_address +3] = Imax_dict["First Byte"]
+        self.holding_registers_table[line_data_address +4] = Imax_dict["Second Byte"]
+        # add Rpu
+        Rpu_dict = self.float_to_int16_IEEE(Rpu)
+        self.input_registers_table[line_data_address +5] = Rpu_dict["First Byte"]
+        self.input_registers_table[line_data_address +6] = Rpu_dict["Second Byte"]
+        self.holding_registers_table[line_data_address +5] = Rpu_dict["First Byte"]
+        self.holding_registers_table[line_data_address +6] = Rpu_dict["Second Byte"]
+        # add Xpu
+        Xpu_dict = self.float_to_int16_IEEE(Xpu)
+        self.input_registers_table[line_data_address +7] = Xpu_dict["First Byte"]
+        self.input_registers_table[line_data_address +8] = Xpu_dict["Second Byte"]
+        self.holding_registers_table[line_data_address +7] = Xpu_dict["First Byte"]
+        self.holding_registers_table[line_data_address +8] = Xpu_dict["Second Byte"]
+        # add Gpu
+        Gpu_dict = self.float_to_int16_IEEE(Gpu)
+        self.input_registers_table[line_data_address +9] = Gpu_dict["First Byte"]
+        self.input_registers_table[line_data_address +10] = Gpu_dict["Second Byte"]
+        self.holding_registers_table[line_data_address +9] = Gpu_dict["First Byte"]
+        self.holding_registers_table[line_data_address +10] = Gpu_dict["Second Byte"]
+        # add Bpu
+        Bpu_dict = self.float_to_int16_IEEE(Bpu)
+        self.input_registers_number[line_data_address +11] = Bpu_dict["First Byte"]
+        self.input_registers_number[line_data_address +12] = Bpu_dict["Second Byte"]
+        self.holding_registers_table[line_data_address +11] = Bpu_dict["First Byte"]
+        self.holding_registers_table[line_data_address +12] = Bpu_dict["Second Byte"]
+        #  add status
+        self.discrete_inputs_table[status_address] = status
+        self.coils_table[status_address] = status
+        #  increase the object number
+        self.line_data_object_number +=1
+
+        return True
 
     def set_shunt_data(self,
         bus_number,
@@ -468,14 +573,83 @@ class Modbus_Table_Class(Convent_Engine_Class):
         self.shunt_data_object_number +=1
         return True
 
-    def set_2_winding_data(self,
+    def set_2winding_data(self,
         from_bus_number,
         to_bus_number,
-        r,
-        x,
-        winding_mva_base,
+        Rpu,
+        Xpu,
+        winding_MVA_base,
         status):
-        pass
+        """
+        Set 2winding_data with arguments:
+        - from_bus_number
+        - to_bus_number
+        - Rpu
+        - Xpu
+        - winding_MVA_base
+        - status
+        """
+        #  find to check
+        for count in range(0, self.two_winding_data_object_number):
+            # calculate address of 2winding_data
+            two_winding_data_address = self.TWO_WINDING_DATA_START_INPUT_REG + count*self.TWO_WINDING_DATA_FRAME_LENGTH
+            status_address = self.TWO_WINDING_DATA_START_DISCRETE_INPUT + count*self.TWO_WINDING_DATA_FRAME_LENGTH
+            # found is this two winding data is existed
+            if(self.input_registers_table[two_winding_data_address] == from_bus_number):
+                if(self.input_registers_table[two_winding_data_address +1] == to_bus_number):
+                    #  change Rpu
+                    Rpu_dict = self.float_to_int16_IEEE(Rpu)
+                    self.input_registers_table[two_winding_data_address +2] = Rpu_dict["First Byte"]
+                    self.input_registers_table[two_winding_data_address +3] = Rpu_dict["Second Byte"]
+                    self.holding_registers_table[two_winding_data_address +2] = Rpu_dict["First Byte"]
+                    self.holding_registers_table[two_winding_data_address +3] = Rpu_dict["Second Byte"]
+                    # change Xpu
+                    Xpu_dict = self.float_to_int16_IEEE(Xpu)
+                    self.input_registers_table[two_winding_data_address +4] = Xpu_dict["First Byte"]
+                    self.input_registers_table[two_winding_data_address +5] = Xpu_dict["Second Byte"]
+                    self.holding_registers_table[two_winding_data_address +4] = Xpu_dict["First Byte"]
+                    self.holding_registers_table[two_winding_data_address +5] = Xpu_dict["Second Byte"]
+                    # change Winding MVA Base
+                    self.input_registers_table[two_winding_data_address +6] = winding_MVA_base
+                    self.holding_registers_table[two_winding_data_address +6] = winding_MVA_base
+                    #  change status 
+                    self.discrete_inputs_table[status_address] = status
+                    self.coils_table[status_address] = status
+                    
+                    return True
+        # if there is no 2winding data
+        # calculate address
+        two_winding_data_address = self.TWO_WINDING_DATA_START_INPUT_REG + self.two_winding_data_object_number*self.TWO_WINDING_DATA_FRAME_LENGTH
+        status_address = self.TWO_WINDING_DATA_START_DISCRETE_INPUT + self.two_winding_data_object_number*self.TWO_WINDING_DATA_FRAME_LENGTH
+        # add from_bus_number
+        self.input_registers_table[two_winding_data_address] = from_bus_number
+        self.holding_registers_table[two_winding_data_address] = from_bus_number
+        # add to_bus_number
+        self.input_registers_table[two_winding_data_address +1] = to_bus_number
+        self.holding_registers_table[two_winding_data_address +1] = to_bus_number
+        #  add Rpu
+        Rpu_dict = self.float_to_int16_IEEE(Rpu)
+        self.input_registers_table[two_winding_data_address +2] = Rpu_dict["First Byte"]
+        self.input_registers_table[two_winding_data_address +3] = Rpu_dict["Second Byte"]
+        self.holding_registers_table[two_winding_data_address +2] = Rpu_dict["First Byte"]
+        self.holding_registers_table[two_winding_data_address +3] = Rpu_dict["Second Byte"]
+        # add Xpu
+        Xpu_dict = self.float_to_int16_IEEE(Xpu)
+        self.input_registers_table[two_winding_data_address +4] = Xpu_dict["First Byte"]
+        self.input_registers_table[two_winding_data_address +5] = Xpu_dict["Second Byte"]
+        self.holding_registers_table[two_winding_data_address +4] = Xpu_dict["First Byte"]
+        self.holding_registers_table[two_winding_data_address +5] = Xpu_dict["Second Byte"]
+        # add Winding MVA Base
+        self.input_registers_table[two_winding_data_address +6] = winding_MVA_base
+        self.holding_registers_table[two_winding_data_address +6] = winding_MVA_base
+        #  add status 
+        self.discrete_inputs_table[status_address] = status
+        self.coils_table[status_address] = status
+        # increase the object
+        self.two_winding_data_object_number +=1
+        
+        return True
+        
     
     def print_modbus_table(self):
         # print discrete input table
