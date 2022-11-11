@@ -7,112 +7,163 @@ class Convent_Engine_Class:
     def __init__(self) -> None:
         pass
 
-    def binaryOfFraction_str(self,fraction_number):
-        """
-        Function to convert a fraction to binary string
-        - fraction_number : fraction to be converted.
-        - return binary string for fraction number
-        """
+    # Function for converting decimal to binary
+    def float_bin(self,my_number, places = 3):
+        my_whole, my_dec = str(my_number).split(".")
+        my_whole = int(my_whole)
+        res = (str(bin(my_whole))+".").replace('0b','')
 
-        # Declaring an empty string
-        # to store binary bits.
-        binary = str()
+        for x in range(places):
+            my_dec = str('0.')+str(my_dec)
+            temp = '%1.20f' %(float(my_dec)*2)
+            my_whole, my_dec = temp.split(".")
+            res += my_whole
+        return res
 
-        # Iterating through
-        # fraction until it
-        # becomes Zero.
-        while (fraction_number):
-            
-            # Multiplying fraction by 2.
-            fraction_number *= 2
-
-            # Storing Integer Part of
-            # Fraction in int_part.
-            if (fraction_number >= 1):
-                int_part = 1
-                fraction_number -= 1
-            else:
-                int_part = 0
-        
-            # Adding int_part to binary
-            # after every iteration.
-            binary += str(int_part)
-
-        # Returning the binary string.
-        return binary
-
-    def float_to_int16_IEEE(self,float_number):
+    def convert_to_fp32(self,float_number):
         """
         convert the float to 2 byte of 32bit within IEE 754 standard
         - float_number : number to 
         - return a dictionary within 2 bytes ["First Byte":<first byte>, "Second Byte"=<second byte>]
         """
-        # this dictionary contains 2 bytes to return
-        result_dictionary = {
-            "First Byte":0,
-            "Second Byte":0,
-        }
-        # Setting Sign bit
-        # default to zero.
-        sign_bit = 0
+        # identifying whether the number
+        # is positive or negative
+        sign = 0
+        if float_number < 0 :
+            sign = 1
+            float_number = float_number * (-1)
+        p = 30
+        # convert float to binary
+        dec = self.float_bin(float_number, places = p)
 
-        # Sign bit will set to
-        # 1 for negative no.
-        if(float_number < 0):
-            sign_bit = 1
+        dotPlace = dec.find('.')
+        onePlace = dec.find('1')
+        # finding the mantissa
+        if onePlace > dotPlace:
+            dec = dec.replace(".","")
+            onePlace -= 1
+            dotPlace -= 1
+        elif onePlace < dotPlace:
+            dec = dec.replace(".","")
+            dotPlace -= 1
+        mantissa = dec[onePlace+1:]
 
-        # converting given no. to
-        # absolute value as we have
-        # already set the sign bit.
-        float_number = abs(float_number)
+        # calculating the exponent(E)
+        exponent = dotPlace - onePlace
+        exponent_bits = exponent + 127
 
-        # Converting Integer Part
-        # of Real no to Binary
-        int_str = bin(int(float_number))[2 : ]
+        # converting the exponent from
+        # decimal to binary
+        exponent_bits = bin(exponent_bits).replace("0b",'')
 
-        # Function call to convert
-        # Fraction part of real no
-        # to Binary.
-        fraction_str = self.binaryOfFraction_str(float_number - int(float_number))
+        mantissa = mantissa[0:23]
 
-        # Getting the index where
-        # Bit was high for the first
-        # Time in binary repress
-        # of Integer part of real no.
-        ind = int_str.find("1")
+        # the IEEE754 notation in binary	
+        result_str = str(sign) + exponent_bits.zfill(8) + mantissa
 
-        # The Exponent is the no.
-        # By which we have right
-        # Shifted the decimal and
-        # it is given below.
-        # Also converting it to bias
-        # exp by adding 127.
-        exp_str = bin((len(int_str) - ind - 1) + 127)[2 : ]
+        # convert the binary to hexadecimal
 
-        # getting mantissa string
-        # By adding int_str and fraction_str.
-        # the zeroes in MSB of int_str
-        # have no significance so they
-        # are ignored by slicing.
-        mant_str = int_str[ind + 1 : ] + fraction_str
 
-        # Adding Zeroes in LSB of
-        # mantissa string so as to make
-        # it's length of 23 bits.
-        mant_str = mant_str + ('0' * (23 - len(mant_str)))
-
-        # graft binary paths to binary string
-        result_str = str(sign_bit) + exp_str + mant_str[:23]
-
+        # print(result_str)
         # separate 2 bytes from result string
         first_byte_str  = result_str[:16]
-        second_byte_str = result_str[17:32]
+        second_byte_str = result_str[16:33]
 
+        result_dictionary = {}
         #  convert string to int 
         result_dictionary["First Byte"] = int(first_byte_str,2)
         result_dictionary["Second Byte"] = int(second_byte_str,2)
 
         return  result_dictionary
+    
+    def convertToInt(self,mantissa_str):
+        """
+        Function to convert Binary
+        of Mantissa to float value.
+        """
+ 
+        # variable to make a count
+        # of negative power of 2.
+        power_count = -1
+    
+        # variable to store
+        # float value of mantissa.
+        mantissa_int = 0
+    
+        # Iterations through binary
+        # Number. Standard form of
+        # Mantissa is 1.M so we have
+        # 0.M therefore we are taking
+        # negative powers on 2 for
+        # conversion.
+        for i in mantissa_str:
+    
+            # Adding converted value of
+            # Binary bits in every
+            # iteration to float mantissa.
+            mantissa_int += (int(i) * pow(2, power_count))
+    
+            # count will decrease by 1
+            # as we move toward right.
+            power_count -= 1
+            
+        # returning mantissa in 1.M form.
+        return (mantissa_int + 1)
+
+    def convert_to_real(self,high_int16, low_int16):
+        high_int16_str = str(bin(high_int16)[2:].zfill(16))
+        low_int16_str = str(bin(low_int16)[2:].zfill(16))
+        # print(high_int16_str)
+        # print(low_int16_str)
+
+        ieee_32 =   high_int16_str[0] \
+                    + "|" \
+                    + high_int16_str[1:9] \
+                    + "|" \
+                    + high_int16_str[9:16] \
+                    + low_int16_str 
+        # print(ieee_32)       
+         # First bit will be sign bit.
+        sign_bit = int(ieee_32[0])
+
+        # Next 8 bits will be
+        # Exponent Bits in Biased
+        # form.
+        exponent_bias = int(ieee_32[2 : 10], 2)
+
+        # In 32 Bit format bias
+        # value is 127 so to have
+        # unbiased exponent
+        # subtract 127.
+        exponent_unbias = exponent_bias - 127
+
+        # Next 23 Bits will be
+        # Mantissa (1.M format)
+        mantissa_str = ieee_32[11 : ]
+
+        # Function call to convert
+        # 23 binary bits into
+        # 1.M real no. form
+        mantissa_int = self.convertToInt(mantissa_str)
+
+        # The final real no. obtained
+        # by sign bit, mantissa and
+        # Exponent.
+        real_no = pow(-1, sign_bit) * mantissa_int * pow(2, exponent_unbias)
+
+        # Printing the obtained
+        # Real value of floating
+        # Point Representation.
+        # print("The float value of the given IEEE-754 representation is :",real_no)
+
+        return real_no
+
+
 if __name__ == '__main__':
     convert_engine = Convent_Engine_Class()
-    print(convert_engine.float_to_int16_IEEE(-2.25000))
+    print(hex(convert_engine.convert_to_fp32(2.02)["First Byte"]))
+    print(hex(convert_engine.convert_to_fp32(2.02)["Second Byte"]))
+    
+    # convert_engine.convert_to_real(0x42c8,0x6666)
+    # print(convert_engine.convert_to_real(32563,6553))
+

@@ -97,7 +97,7 @@ if __name__ == "__main__":
 	# Sign, Exponent and
 	# Mantissa Bit Strings.
 	numb = -2.000333
-	sign_bit, exp_str, mant_str = floatingPoint(-2.251)
+	sign_bit, exp_str, mant_str = floatingPoint(1.2)
 
 	# Final Floating point Representation.
 	ieee_32 = str(sign_bit) + '|' + exp_str + '|' + mant_str
