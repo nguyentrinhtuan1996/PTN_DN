@@ -9,7 +9,18 @@ class Convent_Engine_Class:
 
     # Function for converting decimal to binary
     def float_bin(self,my_number, places = 3):
-        my_whole, my_dec = str(my_number).split(".")
+        my_whole = ""
+        my_dec = ""
+        my_number_str = "%.20f"% my_number
+
+        old_length = len(my_number_str)
+        for count in range(0, old_length):
+            if(my_number_str[old_length - count -1] == '0'):
+                my_number_str = my_number_str[:old_length - count -1]
+            else: 
+                break
+        my_whole, my_dec= my_number_str.split(".")
+
         my_whole = int(my_whole)
         res = (str(bin(my_whole))+".").replace('0b','')
 
@@ -28,6 +39,7 @@ class Convent_Engine_Class:
         """
         # identifying whether the number
         # is positive or negative
+        
         sign = 0
         if float_number < 0 :
             sign = 1
@@ -71,8 +83,15 @@ class Convent_Engine_Class:
 
         result_dictionary = {}
         #  convert string to int 
-        result_dictionary["First Byte"] = int(first_byte_str,2)
-        result_dictionary["Second Byte"] = int(second_byte_str,2)
+        try:
+            result_dictionary["First Byte"] = int(first_byte_str,2)
+        except:
+            result_dictionary["First Byte"] = 0
+        try:
+            result_dictionary["Second Byte"] = int(second_byte_str,2)
+        except:
+            result_dictionary["Second Byte"] = 0
+
 
         return  result_dictionary
     
@@ -158,12 +177,26 @@ class Convent_Engine_Class:
 
         return real_no
 
-
 if __name__ == '__main__':
     convert_engine = Convent_Engine_Class()
-    print(hex(convert_engine.convert_to_fp32(2.02)["First Byte"]))
-    print(hex(convert_engine.convert_to_fp32(2.02)["Second Byte"]))
+    print(hex(convert_engine.convert_to_fp32(0.00000001)["First Byte"]))
+    print(hex(convert_engine.convert_to_fp32(0.00000001)["Second Byte"]))
     
+    # my_number_str = "%.20f"% -0.00000002
+    # print(my_number_str)
+
+    # old_length = len(my_number_str)
+    # for count in range(0, old_length):
+    #     if(my_number_str[old_length - count -1] == '0'):
+    #         my_number_str = my_number_str[:old_length - count -1]
+    #     else: 
+    #         break
+    # my_whole, my_dec= my_number_str.split(".")
+    # print(my_whole)
+    # print(my_dec)
+
+    
+    # print(my_dec)
     # convert_engine.convert_to_real(0x42c8,0x6666)
     # print(convert_engine.convert_to_real(32563,6553))
 
