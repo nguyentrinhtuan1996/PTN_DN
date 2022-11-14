@@ -105,10 +105,10 @@ class Modbus_Table_Class(Convent_Engine_Class):
 
         # for input register
         for count in range(0, self.TWO_WINDING_DATA_END_INPUT_REG +1):
-            self.input_registers_table.append(0)
+            self.input_registers_table.append(None)
         # for holding register 
         for count in range(0, self.TWO_WINDING_DATA_END_HOLDING_REG +1):
-            self.holding_registers_table.append(0)
+            self.holding_registers_table.append(None)
         
     def set_bus(self,bus_number, bus_name):
         """
@@ -166,10 +166,10 @@ class Modbus_Table_Class(Convent_Engine_Class):
         bus_number, 
         code,
         udm,
-        normal,
         normal_vmin,
         normal_vmax, 
         emergency_vmax,
+        emergency_vmin,
         status):
         """
         Set bus data with spec:
@@ -207,26 +207,26 @@ class Modbus_Table_Class(Convent_Engine_Class):
                 self.input_registers_table[bus_data_address +5] = udm_dict["First Byte"]
                 self.holding_registers_table[bus_data_address +4] = udm_dict["Second Byte"]
                 self.holding_registers_table[bus_data_address +5] = udm_dict["First Byte"]
-                #  for normal
-                normal_dict = self.convert_to_fp32(normal)
-                self.input_registers_table[bus_data_address +6] = normal_dict["Second Byte"]
-                self.input_registers_table[bus_data_address +7] = normal_dict["First Byte"]
-                self.holding_registers_table[bus_data_address +6] = normal_dict["Second Byte"]
-                self.holding_registers_table[bus_data_address +7] = normal_dict["First Byte"]
                 #  for normal_vmin
                 normal_vmin_dict = self.convert_to_fp32(normal_vmin)
-                self.input_registers_table[bus_data_address +8] = normal_vmin_dict["Second Byte"]
-                self.input_registers_table[bus_data_address +9] = normal_vmin_dict["First Byte"]
-                self.holding_registers_table[bus_data_address +8] = normal_vmin_dict["Second Byte"]
-                self.holding_registers_table[bus_data_address +9] = normal_vmin_dict["First Byte"]
+                self.input_registers_table[bus_data_address +6] = normal_vmin_dict["Second Byte"]
+                self.input_registers_table[bus_data_address +7] = normal_vmin_dict["First Byte"]
+                self.holding_registers_table[bus_data_address +6] = normal_vmin_dict["Second Byte"]
+                self.holding_registers_table[bus_data_address +7] = normal_vmin_dict["First Byte"]
                 # for normal_vmax 
                 normal_vmax_dict = self.convert_to_fp32(normal_vmax)
-                self.input_registers_table[bus_data_address +10] = normal_vmax_dict["Second Byte"]
-                self.input_registers_table[bus_data_address +11] = normal_vmax_dict["First Byte"]
-                self.holding_registers_table[bus_data_address +10] = normal_vmax_dict["Second Byte"]
-                self.holding_registers_table[bus_data_address +11] = normal_vmax_dict["First Byte"]
+                self.input_registers_table[bus_data_address +8] = normal_vmax_dict["Second Byte"]
+                self.input_registers_table[bus_data_address +9] = normal_vmax_dict["First Byte"]
+                self.holding_registers_table[bus_data_address +8] = normal_vmax_dict["Second Byte"]
+                self.holding_registers_table[bus_data_address +9] = normal_vmax_dict["First Byte"]
                 #  for emergency_vmax
                 emergency_vmax_dict = self.convert_to_fp32(emergency_vmax)
+                self.input_registers_table[bus_data_address +10] = emergency_vmax_dict["Second Byte"]
+                self.input_registers_table[bus_data_address +11] = emergency_vmax_dict["First Byte"]
+                self.holding_registers_table[bus_data_address +10] = emergency_vmax_dict["Second Byte"]
+                self.holding_registers_table[bus_data_address +11] = emergency_vmax_dict["First Byte"]
+                #  for emergency_vmin
+                emergency_vmax_dict = self.convert_to_fp32(emergency_vmin)
                 self.input_registers_table[bus_data_address +12] = emergency_vmax_dict["Second Byte"]
                 self.input_registers_table[bus_data_address +13] = emergency_vmax_dict["First Byte"]
                 self.holding_registers_table[bus_data_address +12] = emergency_vmax_dict["Second Byte"]
@@ -264,26 +264,26 @@ class Modbus_Table_Class(Convent_Engine_Class):
         self.input_registers_table[bus_data_address +5] = udm_dict["First Byte"]
         self.holding_registers_table[bus_data_address +4] = udm_dict["Second Byte"]
         self.holding_registers_table[bus_data_address +5] = udm_dict["First Byte"]
-        #  for normal
-        normal_dict = self.convert_to_fp32(normal)
-        self.input_registers_table[bus_data_address +6] = normal_dict["Second Byte"]
-        self.input_registers_table[bus_data_address +7] = normal_dict["First Byte"]
-        self.holding_registers_table[bus_data_address +6] = normal_dict["Second Byte"]
-        self.holding_registers_table[bus_data_address +7] = normal_dict["First Byte"]
         #  for normal_vmin
         normal_vmin_dict = self.convert_to_fp32(normal_vmin)
-        self.input_registers_table[bus_data_address +8] = normal_vmin_dict["Second Byte"]
-        self.input_registers_table[bus_data_address +9] = normal_vmin_dict["First Byte"]
-        self.holding_registers_table[bus_data_address +8] = normal_vmin_dict["Second Byte"]
-        self.holding_registers_table[bus_data_address +9] = normal_vmin_dict["First Byte"]
+        self.input_registers_table[bus_data_address +6] = normal_vmin_dict["Second Byte"]
+        self.input_registers_table[bus_data_address +7] = normal_vmin_dict["First Byte"]
+        self.holding_registers_table[bus_data_address +6] = normal_vmin_dict["Second Byte"]
+        self.holding_registers_table[bus_data_address +7] = normal_vmin_dict["First Byte"]
         # for normal_vmax 
         normal_vmax_dict = self.convert_to_fp32(normal_vmax)
-        self.input_registers_table[bus_data_address +10] = normal_vmax_dict["Second Byte"]
-        self.input_registers_table[bus_data_address +11] = normal_vmax_dict["First Byte"]
-        self.holding_registers_table[bus_data_address +10] = normal_vmax_dict["Second Byte"]
-        self.holding_registers_table[bus_data_address +11] = normal_vmax_dict["First Byte"]
+        self.input_registers_table[bus_data_address +8] = normal_vmax_dict["Second Byte"]
+        self.input_registers_table[bus_data_address +9] = normal_vmax_dict["First Byte"]
+        self.holding_registers_table[bus_data_address +8] = normal_vmax_dict["Second Byte"]
+        self.holding_registers_table[bus_data_address +9] = normal_vmax_dict["First Byte"]
         #  for emergency_vmax
         emergency_vmax_dict = self.convert_to_fp32(emergency_vmax)
+        self.input_registers_table[bus_data_address +10] = emergency_vmax_dict["Second Byte"]
+        self.input_registers_table[bus_data_address +11] = emergency_vmax_dict["First Byte"]
+        self.holding_registers_table[bus_data_address +10] = emergency_vmax_dict["Second Byte"]
+        self.holding_registers_table[bus_data_address +11] = emergency_vmax_dict["First Byte"]
+        #  for emergency_vmin
+        emergency_vmax_dict = self.convert_to_fp32(emergency_vmin)
         self.input_registers_table[bus_data_address +12] = emergency_vmax_dict["Second Byte"]
         self.input_registers_table[bus_data_address +13] = emergency_vmax_dict["First Byte"]
         self.holding_registers_table[bus_data_address +12] = emergency_vmax_dict["Second Byte"]
@@ -451,14 +451,14 @@ class Modbus_Table_Class(Convent_Engine_Class):
                 self.holding_registers_table[line_data_address +13] = Gpu_dict["First Byte"]
                 # change Bpu
                 Bpu_dict = self.convert_to_fp32(Bpu)
-                self.input_registers_number[line_data_address +14] = Bpu_dict["Second Byte"]
-                self.input_registers_number[line_data_address +15] = Bpu_dict["First Byte"]
+                self.input_registers_table[line_data_address +14] = Bpu_dict["Second Byte"]
+                self.input_registers_table[line_data_address +15] = Bpu_dict["First Byte"]
                 self.holding_registers_table[line_data_address +14] = Bpu_dict["Second Byte"]
                 self.holding_registers_table[line_data_address +15] = Bpu_dict["First Byte"]
                 #  change status
                 status_dict = self.convert_to_fp32(status)
-                self.input_registers_number[line_data_address +16] = status_dict["Second Byte"]
-                self.input_registers_number[line_data_address +17] = status_dict["First Byte"]
+                self.input_registers_table[line_data_address +16] = status_dict["Second Byte"]
+                self.input_registers_table[line_data_address +17] = status_dict["First Byte"]
                 self.holding_registers_table[line_data_address +16] = status_dict["Second Byte"]
                 self.holding_registers_table[line_data_address +17] = status_dict["First Byte"]
 
