@@ -105,10 +105,10 @@ class Modbus_Table_Class(Convent_Engine_Class):
 
         # for input register
         for count in range(0, self.TWO_WINDING_DATA_END_INPUT_REG +1):
-            self.input_registers_table.append(None)
+            self.input_registers_table.append(0)
         # for holding register 
         for count in range(0, self.TWO_WINDING_DATA_END_HOLDING_REG +1):
-            self.holding_registers_table.append(None)
+            self.holding_registers_table.append(0)
         
     def set_bus(self,bus_number, bus_name):
         """
@@ -207,14 +207,14 @@ class Modbus_Table_Class(Convent_Engine_Class):
                 self.input_registers_table[bus_data_address +5] = udm_dict["First Byte"]
                 self.holding_registers_table[bus_data_address +4] = udm_dict["Second Byte"]
                 self.holding_registers_table[bus_data_address +5] = udm_dict["First Byte"]
-                #  for normal_vmin
-                normal_vmin_dict = self.convert_to_fp32(normal_vmin)
+                #  for normal_vmax
+                normal_vmin_dict = self.convert_to_fp32(normal_vmax)
                 self.input_registers_table[bus_data_address +6] = normal_vmin_dict["Second Byte"]
                 self.input_registers_table[bus_data_address +7] = normal_vmin_dict["First Byte"]
                 self.holding_registers_table[bus_data_address +6] = normal_vmin_dict["Second Byte"]
                 self.holding_registers_table[bus_data_address +7] = normal_vmin_dict["First Byte"]
-                # for normal_vmax 
-                normal_vmax_dict = self.convert_to_fp32(normal_vmax)
+                # for normal_vmin
+                normal_vmax_dict = self.convert_to_fp32(normal_vmin)
                 self.input_registers_table[bus_data_address +8] = normal_vmax_dict["Second Byte"]
                 self.input_registers_table[bus_data_address +9] = normal_vmax_dict["First Byte"]
                 self.holding_registers_table[bus_data_address +8] = normal_vmax_dict["Second Byte"]
@@ -264,14 +264,14 @@ class Modbus_Table_Class(Convent_Engine_Class):
         self.input_registers_table[bus_data_address +5] = udm_dict["First Byte"]
         self.holding_registers_table[bus_data_address +4] = udm_dict["Second Byte"]
         self.holding_registers_table[bus_data_address +5] = udm_dict["First Byte"]
-        #  for normal_vmin
-        normal_vmin_dict = self.convert_to_fp32(normal_vmin)
+        #  for normal_vmax
+        normal_vmin_dict = self.convert_to_fp32(normal_vmax)
         self.input_registers_table[bus_data_address +6] = normal_vmin_dict["Second Byte"]
         self.input_registers_table[bus_data_address +7] = normal_vmin_dict["First Byte"]
         self.holding_registers_table[bus_data_address +6] = normal_vmin_dict["Second Byte"]
         self.holding_registers_table[bus_data_address +7] = normal_vmin_dict["First Byte"]
-        # for normal_vmax 
-        normal_vmax_dict = self.convert_to_fp32(normal_vmax)
+        # for normal_vmin
+        normal_vmax_dict = self.convert_to_fp32(normal_vmin)
         self.input_registers_table[bus_data_address +8] = normal_vmax_dict["Second Byte"]
         self.input_registers_table[bus_data_address +9] = normal_vmax_dict["First Byte"]
         self.holding_registers_table[bus_data_address +8] = normal_vmax_dict["Second Byte"]
@@ -332,7 +332,7 @@ class Modbus_Table_Class(Convent_Engine_Class):
                 self.input_registers_table[gen_data_address +4] = pgen_dict["Second Byte"]
                 self.input_registers_table[gen_data_address +5] = pgen_dict["First Byte"]
                 self.holding_registers_table[gen_data_address +4] = pgen_dict["Second Byte"]
-                self.holding_registers_number[gen_data_address +5] = pgen_dict["First Byte"]
+                self.holding_registers_table[gen_data_address +5] = pgen_dict["First Byte"]
                 # change the qgen
                 qgen_dict = self.convert_to_fp32(qgen)
                 self.input_registers_table[gen_data_address +6] = qgen_dict["Second Byte"]
@@ -694,22 +694,33 @@ class Modbus_Table_Class(Convent_Engine_Class):
         
         return True
 
+    
+    
+    
     def print_modbus_table(self):
         # print input register table
         for count in range(0,len(self.input_registers_table)):
             if (self.input_registers_table[count] !=None):
-                print("Input register [{index}]:{value} - {value1}".format( 
+                # print("Input register [{index}]:{value} - {value1}".format( 
+                #     index = count, 
+                #     value = self.input_registers_table[count],
+                #     value1 = bin(self.input_registers_table[count])
+                # ))
+                print("Input register [{index}]:{value} ".format( 
                     index = count, 
-                    value = self.input_registers_table[count],
-                    value1 = bin(self.input_registers_table[count])
+                    value = self.input_registers_table[count]
                 ))
         # print holding register table
         for count in range(0,len(self.holding_registers_table)):
             if (self.holding_registers_table[count] !=None):
-                print("Holding register [{index}]:{value} - {value1}".format( 
+                # print("Holding register [{index}]:{value} - {value1}".format( 
+                #     index = count, 
+                #     value = self.holding_registers_table[count], 
+                #     value1 = bin(self.holding_registers_table[count])
+                # ))
+                print("Holding register [{index}]:{value} ".format( 
                     index = count, 
-                    value = self.holding_registers_table[count], 
-                    value1 = bin(self.holding_registers_table[count])
+                    value = self.holding_registers_table[count]
                 ))
     
     def get_bus_name(self, bus_number):
@@ -757,7 +768,7 @@ class Modbus_Table_Class(Convent_Engine_Class):
                     self.holding_registers_table[bus_data_address +4]
                 )
                 # Normal
-                bus_data_dict["Normal"] = self.convert_to_real(
+                bus_data_dict["Normal_Vmax"] = self.convert_to_real(
                     self.holding_registers_table[bus_data_address +7],
                     self.holding_registers_table[bus_data_address +6]
                 )
@@ -767,12 +778,12 @@ class Modbus_Table_Class(Convent_Engine_Class):
                     self.holding_registers_table[bus_data_address +8]
                 )
                 # Normal_Vmax
-                bus_data_dict["Normal_Vmax"] = self.convert_to_real(
+                bus_data_dict["Emergency_Vmax"] = self.convert_to_real(
                     self.holding_registers_table[bus_data_address +11],
                     self.holding_registers_table[bus_data_address +10]
                 )
                 # for Emergency_Vmax
-                bus_data_dict["Emergency_Vmax"] = self.convert_to_real(
+                bus_data_dict["Emergency_Vmin"] = self.convert_to_real(
                     self.holding_registers_table[bus_data_address +13],
                     self.holding_registers_table[bus_data_address +12]
                 )
@@ -842,7 +853,6 @@ class Modbus_Table_Class(Convent_Engine_Class):
                         self.holding_registers_table[line_data_address +1],
                         self.holding_registers_table[line_data_address]
                     )
-
                     #  to_bus_number
                     line_data_dict["To_Bus_Number"] = self.convert_to_real(
                         self.holding_registers_table[line_data_address +3],

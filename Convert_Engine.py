@@ -37,9 +37,10 @@ class Convent_Engine_Class:
         - float_number : number to 
         - return a dictionary within 2 bytes ["First Byte":<first byte>, "Second Byte"=<second byte>]
         """
+        
+       
         # identifying whether the number
         # is positive or negative
-        
         sign = 0
         if float_number < 0 :
             sign = 1
@@ -92,6 +93,10 @@ class Convent_Engine_Class:
         except:
             result_dictionary["Second Byte"] = 0
 
+        if( float_number == 0 or
+            float_number == ""):
+            result_dictionary["First Byte"] = 0
+            result_dictionary["Second Byte"] = 0
 
         return  result_dictionary
     
@@ -130,6 +135,9 @@ class Convent_Engine_Class:
         return (mantissa_int + 1)
 
     def convert_to_real(self,high_int16, low_int16):
+        if( high_int16 == 0 and
+            low_int16 == 0):
+            return 0
         high_int16_str = str(bin(high_int16)[2:].zfill(16))
         low_int16_str = str(bin(low_int16)[2:].zfill(16))
         # print(high_int16_str)
@@ -179,8 +187,8 @@ class Convent_Engine_Class:
 
 if __name__ == '__main__':
     convert_engine = Convent_Engine_Class()
-    print(hex(convert_engine.convert_to_fp32(0.00000001)["First Byte"]))
-    print(hex(convert_engine.convert_to_fp32(0.00000001)["Second Byte"]))
+    print(hex(convert_engine.convert_to_fp32(1)["First Byte"]))
+    print(hex(convert_engine.convert_to_fp32(1)["Second Byte"]))
     
     # my_number_str = "%.20f"% -0.00000002
     # print(my_number_str)
@@ -197,6 +205,6 @@ if __name__ == '__main__':
 
     
     # print(my_dec)
-    # convert_engine.convert_to_real(0x42c8,0x6666)
-    # print(convert_engine.convert_to_real(32563,6553))
+    # convert_engine.convert_to_real(0,0)
+    print(convert_engine.convert_to_real(0,0))
 
