@@ -1,0 +1,12 @@
+{
+    "in_csv_path"               :"a/savnw.csv",
+    "out_csv_path"              :"savnw_out.csv",
+    "delay_time_to_read_csv"    :10,
+    "delay_time_to_write_csv"   :5,
+    "max_quantity_bus"          :100,
+    "max_quantity_bus_data"     :100,
+    "max_quantity_gen_data"     :100,
+    "max_quantity_line_data"    :100,
+    "max_quantity_shunt_data"   :100,
+    "max_quantity_2_winding_data":100
+}

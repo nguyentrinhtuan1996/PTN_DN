@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 from Convert_Engine import Convent_Engine_Class
+import json
+# Opening JSON file
+f = open('config.json')
+# returns JSON object as 
+# a dictionary
+configurations = json.load(f)
+# Closing file
+f.close()
 class Modbus_Table_Class(Convent_Engine_Class):
     """
     there are 6 object:
@@ -13,12 +21,12 @@ class Modbus_Table_Class(Convent_Engine_Class):
                 |
     bus
     """
-    QUANTITY_BUS = 100
-    QUANTITY_BUS_DATA = 100
-    QUANTITY_GEN_DATA = 100
-    QUANTITY_LINE_DATA = 100
-    QUANTITY_SHUNT_DATA = 100
-    QUANTITY_2_WINDING_DATA = 100
+    QUANTITY_BUS = configurations["max_quantity_bus"]
+    QUANTITY_BUS_DATA = configurations["max_quantity_bus_data"]
+    QUANTITY_GEN_DATA = configurations["max_quantity_gen_data"]
+    QUANTITY_LINE_DATA = configurations["max_quantity_line_data"]
+    QUANTITY_SHUNT_DATA = configurations["max_quantity_shunt_data"]
+    QUANTITY_2_WINDING_DATA = configurations["max_quantity_2_winding_data"]
 
     # for bus object (11 x 2 byte) 
     bus_object_number = 0
@@ -695,8 +703,6 @@ class Modbus_Table_Class(Convent_Engine_Class):
         return True
 
     
-    
-    
     def print_modbus_table(self):
         # print input register table
         for count in range(0,len(self.input_registers_table)):
@@ -931,6 +937,9 @@ class Modbus_Table_Class(Convent_Engine_Class):
         return False
     
     def get_two_winding_data(self,from_bus_number, to_bus_number):
+        """
+        this function will read from 
+        """
         for count in range(0, self.two_winding_data_object_number):
             # calculate the address
             two_winding_data_address = self.TWO_WINDING_DATA_START_HOLDING_REG + count*self.TWO_WINDING_DATA_FRAME_LENGTH
@@ -977,6 +986,344 @@ class Modbus_Table_Class(Convent_Engine_Class):
                 return two_winding_data_dict
 
         return False
+
+    def change_bus(self,bus_number, bus_name):
+        """
+        Change the name of a bus. If this bus is existed, change value for bus, on the contrary,
+        engine will create a new. 
+        - bus_number : un signed int 16 bit. That will be stored in input register
+        (0-)
+        - bus_name : a string if length is longer than 10 letter, they will be cut
+        - return True if changing successfully
+        - return False if failed changing
+        """
+        # correct the bus_name
+        if (len(bus_name) >10):
+            bus_name = bus_name[:10]
+        # var to check if this bus number is existing 
+        
+        for count in range (0, self.bus_object_number):
+            # calculate the address of bus number
+            bus_number_address = self.BUS_START_INPUT_REG + count*self.BUS_FRAME_LENGTH
+            # found weather this bus number is existing 
+            if(self.input_registers_table[bus_number_address] == bus_number):
+                # read bus_name from modbus table
+                # bus_name_list = list(bus_number)
+                for count1 in range(0,self.BUS_NAME_MAX_LENGTH):
+                    if (count1 < len(bus_name)):
+                        self.input_registers_table[bus_number_address + count1 +1] = ord(bus_name[count1])
+                        # self.holding_registers_table[bus_number_address + count1 +1] = ord(bus_name[count1])
+                    else:
+                        self.input_registers_table[bus_number_address + count1 +1] = 0
+                        # self.holding_registers_table[bus_number_address + count1 +1] = 0
+                # print(self.input_registers_table)
+                return True
+        return False
+
+    def change_bus_data(self,
+        bus_number, 
+        code,
+        udm,
+        normal_vmin,
+        normal_vmax, 
+        emergency_vmax,
+        emergency_vmin,
+        status):
+        """
+        Set bus data with spec:
+        - bus_number : int
+        - code : int
+        - udm : float
+        - normal: float
+        - normal_vmin : float
+        - normal_vmax : float
+        - emergency_vmax : float
+        - status : bool
+        """
+        #  var to check this bus data is existed 
+        
+        # find to check
+        for count in range(0, self.bus_data_object_number):
+            #  calculate the address of bus data
+            bus_data_address = self.BUS_DATA_START_INPUT_REG + count*self.BUS_DATA_FRAME_LENGTH
+            bus_number_dict = self.convert_to_fp32(bus_number)
+
+            # found if this bus data is existed
+            if( self.input_registers_table[bus_data_address] == bus_number_dict["Second Byte"] and
+                self.input_registers_table[bus_data_address +1] == bus_number_dict["First Byte"]):
+                
+                # for code
+                code_dict = self.convert_to_fp32(code)
+                self.input_registers_table[bus_data_address +2] = code_dict["Second Byte"]
+                self.input_registers_table[bus_data_address +3] = code_dict["First Byte"]
+                # self.holding_registers_table[bus_data_address +2] = code_dict["Second Byte"]
+                # self.holding_registers_table[bus_data_address +3] = code_dict["First Byte"]
+                
+                # for udm
+                udm_dict = self.convert_to_fp32(udm)
+                self.input_registers_table[bus_data_address +4] = udm_dict["Second Byte"]
+                self.input_registers_table[bus_data_address +5] = udm_dict["First Byte"]
+                # self.holding_registers_table[bus_data_address +4] = udm_dict["Second Byte"]
+                # self.holding_registers_table[bus_data_address +5] = udm_dict["First Byte"]
+                #  for normal_vmax
+                normal_vmin_dict = self.convert_to_fp32(normal_vmax)
+                self.input_registers_table[bus_data_address +6] = normal_vmin_dict["Second Byte"]
+                self.input_registers_table[bus_data_address +7] = normal_vmin_dict["First Byte"]
+                # self.holding_registers_table[bus_data_address +6] = normal_vmin_dict["Second Byte"]
+                # self.holding_registers_table[bus_data_address +7] = normal_vmin_dict["First Byte"]
+                # for normal_vmin
+                normal_vmax_dict = self.convert_to_fp32(normal_vmin)
+                self.input_registers_table[bus_data_address +8] = normal_vmax_dict["Second Byte"]
+                self.input_registers_table[bus_data_address +9] = normal_vmax_dict["First Byte"]
+                # self.holding_registers_table[bus_data_address +8] = normal_vmax_dict["Second Byte"]
+                # self.holding_registers_table[bus_data_address +9] = normal_vmax_dict["First Byte"]
+                #  for emergency_vmax
+                emergency_vmax_dict = self.convert_to_fp32(emergency_vmax)
+                self.input_registers_table[bus_data_address +10] = emergency_vmax_dict["Second Byte"]
+                self.input_registers_table[bus_data_address +11] = emergency_vmax_dict["First Byte"]
+                # self.holding_registers_table[bus_data_address +10] = emergency_vmax_dict["Second Byte"]
+                # self.holding_registers_table[bus_data_address +11] = emergency_vmax_dict["First Byte"]
+                #  for emergency_vmin
+                emergency_vmax_dict = self.convert_to_fp32(emergency_vmin)
+                self.input_registers_table[bus_data_address +12] = emergency_vmax_dict["Second Byte"]
+                self.input_registers_table[bus_data_address +13] = emergency_vmax_dict["First Byte"]
+                # self.holding_registers_table[bus_data_address +12] = emergency_vmax_dict["Second Byte"]
+                # self.holding_registers_table[bus_data_address +13] = emergency_vmax_dict["First Byte"]
+                # for status
+                status_dict = self.convert_to_fp32(status)
+                self.input_registers_table[bus_data_address +14] = status_dict["Second Byte"]
+                self.input_registers_table[bus_data_address +15] = status_dict["First Byte"]
+                # self.holding_registers_table[bus_data_address +14] = status_dict["Second Byte"]
+                # self.holding_registers_table[bus_data_address +15] = status_dict["First Byte"]
+
+                return True
+        return False
+
+    def change_gen_data(self,
+        bus_number,
+        unit,
+        pgen,
+        qgen,
+        status):
+        """
+        Set gen data with :
+        - bus_number : int16
+        - unit : int16
+        - pgen : float
+        - qgen : float
+        - status: bool
+        """
+        for count in range(0, self.gen_data_object_number):
+            #  calculate the address of gen data
+            gen_data_address = self.GEN_DATA_START_INPUT_REG + count*self.GEN_DATA_FRAME_LENGTH
+            bus_number_dict = self.convert_to_fp32(bus_number)
+            
+            #  find this gen data
+            if( self.input_registers_table[gen_data_address] == bus_number_dict["Second Byte"] and
+                self.input_registers_table[gen_data_address +1] == bus_number_dict["First Byte"]):
+                # change unit
+                unit_dict = self.convert_to_fp32(unit)
+                self.input_registers_table[gen_data_address +2] = unit_dict["Second Byte"]
+                self.input_registers_table[gen_data_address +3] = unit_dict["First Byte"]
+                # self.holding_registers_table[gen_data_address +2] = unit_dict["Second Byte"]
+                # self.holding_registers_table[gen_data_address +3] = unit_dict["First Byte"]
+                # change pgen
+                pgen_dict = self.convert_to_fp32(pgen)
+                self.input_registers_table[gen_data_address +4] = pgen_dict["Second Byte"]
+                self.input_registers_table[gen_data_address +5] = pgen_dict["First Byte"]
+                # self.holding_registers_table[gen_data_address +4] = pgen_dict["Second Byte"]
+                # self.holding_registers_table[gen_data_address +5] = pgen_dict["First Byte"]
+                # change the qgen
+                qgen_dict = self.convert_to_fp32(qgen)
+                self.input_registers_table[gen_data_address +6] = qgen_dict["Second Byte"]
+                self.input_registers_table[gen_data_address +7] = qgen_dict["First Byte"]
+                # self.holding_registers_table[gen_data_address +6] = qgen_dict["Second Byte"]
+                # self.holding_registers_table[gen_data_address +7] = qgen_dict["First Byte"]
+                #  change status
+                status_dict = self.convert_to_fp32(status)
+                self.input_registers_table[gen_data_address +8] = status_dict["Second Byte"]
+                self.input_registers_table[gen_data_address +9] = status_dict["First Byte"]
+                # self.holding_registers_table[gen_data_address +8] = status_dict["Second Byte"]
+                # self.holding_registers_table[gen_data_address +9] = status_dict["First Byte"]
+
+                return True
+        return False
+
+    def change_line_data(self,
+        from_bus_number,
+        to_bus_number,
+        ID,
+        Imax,
+        Rpu,
+        Xpu,
+        Gpu,
+        Bpu,
+        status):
+        """
+        set a line data with arguments:
+        - from_bus_number : int16
+        - to_bus_number : int16
+        - ID
+        - Imax,
+        - Rpu,
+        - Xpu,
+        - Gpu,
+        - Bpu,
+        - status
+        """
+        for count in range(0, self.line_data_object_number):
+            #  calculate addresses
+            line_data_address = self.LINE_DATA_START_INPUT_REG + count*self.LINE_DATA_FRAME_LENGTH
+            from_bus_number_dict = self.convert_to_fp32(from_bus_number)
+            to_bus_number_dict = self.convert_to_fp32(to_bus_number)
+
+            if( self.input_registers_table[line_data_address] == from_bus_number_dict["Second Byte"] and
+                self.input_registers_table[line_data_address +1] == from_bus_number_dict["First Byte"] and
+                self.input_registers_table[line_data_address +2] == to_bus_number_dict["Second Byte"] and
+                self.input_registers_table[line_data_address +3] == to_bus_number_dict["First Byte"]):
+                # change ID
+                ID_dict = self.convert_to_fp32(ID)
+                self.input_registers_table[line_data_address +4] = ID_dict["Second Byte"]
+                self.input_registers_table[line_data_address +5] = ID_dict["First Byte"]
+                # self.holding_registers_table[line_data_address +4] = ID_dict["Second Byte"]
+                # self.holding_registers_table[line_data_address +5] = ID_dict["First Byte"]
+                # change Imax
+                Imax_dict = self.convert_to_fp32(Imax)
+                self.input_registers_table[line_data_address +6] = Imax_dict["Second Byte"]
+                self.input_registers_table[line_data_address +7] = Imax_dict["First Byte"]
+                # self.holding_registers_table[line_data_address +6] = Imax_dict["Second Byte"]
+                # self.holding_registers_table[line_data_address +7] = Imax_dict["First Byte"]
+                # change Rpu
+                Rpu_dict = self.convert_to_fp32(Rpu)
+                self.input_registers_table[line_data_address +8] = Rpu_dict["Second Byte"]
+                self.input_registers_table[line_data_address +9] = Rpu_dict["First Byte"]
+                # self.holding_registers_table[line_data_address +8] = Rpu_dict["Second Byte"]
+                # self.holding_registers_table[line_data_address +9] = Rpu_dict["First Byte"]
+                # change Xpu
+                Xpu_dict = self.convert_to_fp32(Xpu)
+                self.input_registers_table[line_data_address +10] = Xpu_dict["Second Byte"]
+                self.input_registers_table[line_data_address +11] = Xpu_dict["First Byte"]
+                # self.holding_registers_table[line_data_address +10] = Xpu_dict["Second Byte"]
+                # self.holding_registers_table[line_data_address +11] = Xpu_dict["First Byte"]
+                # change Gpu
+                Gpu_dict = self.convert_to_fp32(Gpu)
+                self.input_registers_table[line_data_address +12] = Gpu_dict["Second Byte"]
+                self.input_registers_table[line_data_address +13] = Gpu_dict["First Byte"]
+                # self.holding_registers_table[line_data_address +12] = Gpu_dict["Second Byte"]
+                # self.holding_registers_table[line_data_address +13] = Gpu_dict["First Byte"]
+                # change Bpu
+                Bpu_dict = self.convert_to_fp32(Bpu)
+                self.input_registers_table[line_data_address +14] = Bpu_dict["Second Byte"]
+                self.input_registers_table[line_data_address +15] = Bpu_dict["First Byte"]
+                # self.holding_registers_table[line_data_address +14] = Bpu_dict["Second Byte"]
+                # self.holding_registers_table[line_data_address +15] = Bpu_dict["First Byte"]
+                #  change status
+                status_dict = self.convert_to_fp32(status)
+                self.input_registers_table[line_data_address +16] = status_dict["Second Byte"]
+                self.input_registers_table[line_data_address +17] = status_dict["First Byte"]
+                # self.holding_registers_table[line_data_address +16] = status_dict["Second Byte"]
+                # self.holding_registers_table[line_data_address +17] = status_dict["First Byte"]
+
+                return True
+        return False
+
+    def change_shunt_data(self,
+        bus_number,
+        g_shunt,
+        b_shunt,
+        status):
+        """
+        Set a shunt data with arguments:
+        - bus_number : in16
+        - g_shunt : float
+        - b_shunt : float
+        - status : bool
+        """
+        for count in range(0, self.shunt_data_object_number):
+            #  calculate the address
+            shunt_data_address = self.SHUNT_DATA_START_INPUT_REG + count*self.SHUNT_DATA_FRAME_LENGTH
+            bus_number_dict = self.convert_to_fp32(bus_number)
+
+            # found if this shunt data is existed
+            if( self.input_registers_table[shunt_data_address] == bus_number_dict["Second Byte"] and
+                self.input_registers_table[shunt_data_address +1] == bus_number_dict["First Byte"]):
+                #  change the g_shunt
+                g_shunt_dict = self.convert_to_fp32(g_shunt)
+                self.input_registers_table[shunt_data_address +2] = g_shunt_dict["Second Byte"]
+                self.input_registers_table[shunt_data_address +3] = g_shunt_dict["First Byte"]
+                # self.holding_registers_table[shunt_data_address +2] = g_shunt_dict["Second Byte"]
+                # self.holding_registers_table[shunt_data_address +3] = g_shunt_dict["First Byte"]
+                #  change b_shunt
+                b_shunt_dict = self.convert_to_fp32(b_shunt)
+                self.input_registers_table[shunt_data_address +4] = b_shunt_dict["Second Byte"]
+                self.input_registers_table[shunt_data_address +5] = b_shunt_dict["First Byte"]
+                # self.holding_registers_table[shunt_data_address +4] = b_shunt_dict["Second Byte"]
+                # self.holding_registers_table[shunt_data_address +5] = b_shunt_dict["First Byte"]
+                # for status
+                status_dict = self.convert_to_fp32(status)
+                self.input_registers_table[shunt_data_address +6] = status_dict["Second Byte"]
+                self.input_registers_table[shunt_data_address +7] = status_dict["First Byte"]
+                # self.holding_registers_table[shunt_data_address +6] = status_dict["Second Byte"]
+                # self.holding_registers_table[shunt_data_address +7] = status_dict["First Byte"]
+
+                return True
+        return False
+
+    def change_two_winding_data(self,
+        from_bus_number,
+        to_bus_number,
+        Rpu,
+        Xpu,
+        winding_MVA_base,
+        status):
+        """
+        Set 2winding_data with arguments:
+        - from_bus_number : int16
+        - to_bus_number: int16
+        - Rpu; float
+        - Xpu: float
+        - winding_MVA_base: int16
+        - status: bool
+        """
+        #  find to check
+        for count in range(0, self.two_winding_data_object_number):
+            # calculate address of 2winding_data
+            two_winding_data_address = self.TWO_WINDING_DATA_START_INPUT_REG + count*self.TWO_WINDING_DATA_FRAME_LENGTH
+            from_bus_number_dict = self.convert_to_fp32(from_bus_number)
+            to_bus_number_dict = self.convert_to_fp32(to_bus_number)
+
+            if( self.input_registers_table[two_winding_data_address] == from_bus_number_dict["Second Byte"] and
+                self.input_registers_table[two_winding_data_address +1] == from_bus_number_dict["First Byte"] and
+                self.input_registers_table[two_winding_data_address +2] == to_bus_number_dict["Second Byte"] and
+                self.input_registers_table[two_winding_data_address +3] == to_bus_number_dict["First Byte"]):
+                #  change Rpu
+                Rpu_dict = self.convert_to_fp32(Rpu)
+                self.input_registers_table[two_winding_data_address +4] = Rpu_dict["Second Byte"]
+                self.input_registers_table[two_winding_data_address +5] = Rpu_dict["First Byte"]
+                # self.holding_registers_table[two_winding_data_address +4] = Rpu_dict["Second Byte"]
+                # self.holding_registers_table[two_winding_data_address +5] = Rpu_dict["First Byte"]
+                # change Xpu
+                Xpu_dict = self.convert_to_fp32(Xpu)
+                self.input_registers_table[two_winding_data_address +6] = Xpu_dict["Second Byte"]
+                self.input_registers_table[two_winding_data_address +7] = Xpu_dict["First Byte"]
+                # self.holding_registers_table[two_winding_data_address +6] = Xpu_dict["Second Byte"]
+                # self.holding_registers_table[two_winding_data_address +7] = Xpu_dict["First Byte"]
+                # change Winding MVA Base
+                winding_MVA_base_dict = self.convert_to_fp32(winding_MVA_base)
+                self.input_registers_table[two_winding_data_address +8] = winding_MVA_base_dict["Second Byte"]
+                self.holding_registers_table[two_winding_data_address +9] = winding_MVA_base_dict["First Byte"]
+                # self.holding_registers_table[two_winding_data_address +8] = winding_MVA_base_dict["Second Byte"]
+                # self.holding_registers_table[two_winding_data_address +9] = winding_MVA_base_dict["First Byte"]
+                # for status
+                status_dict = self.convert_to_fp32(status)
+                self.input_registers_table[two_winding_data_address +10] = status_dict["Second Byte"]
+                self.input_registers_table[two_winding_data_address +11] = status_dict["First Byte"]
+                # self.holding_registers_table[two_winding_data_address +10] = status_dict["Second Byte"]
+                # self.holding_registers_table[two_winding_data_address +11] = status_dict["First Byte"]
+                
+                return True
+        return False
+        
 
 if __name__ == '__main__':
     modbus_table = Modbus_Table_Class()

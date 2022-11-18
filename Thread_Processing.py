@@ -3,9 +3,18 @@ from Modbus_Server import Modbus_Server_Class, modbus_table
 import threading
 from time import sleep
 from datetime import datetime
-class Thread_Processing_Class():
+import json
 
-    def __init__(self, in_csv_path, out_csv_path) -> None:
+# Opening JSON file
+f = open('config.json')
+# returns JSON object as 
+# a dictionary
+configurations = json.load(f)
+# Closing file
+f.close()
+
+class Thread_Processing_Class():
+    def __init__(self, in_csv_path = configurations["in_csv_path"],out_csv_path= configurations["out_csv_path"]) -> None:
         # save paths to work
         self.in_csv_path = in_csv_path
         self.out_csv_path = out_csv_path
@@ -33,22 +42,24 @@ class Thread_Processing_Class():
         self.thread_write_output_csv.start()
     
     def thread_loop_read_csv(self):
+        self.csv_in_engine.import_csv()
+        self.set_in_csv_to_modbus_table()
         while True:
             print(datetime.now())
             print(" Read input csv")
             self.csv_in_engine.import_csv()
-            self.get_in_csv_to_modbus_table()
-            sleep(15)
+            self.update_in_csv_to_modbus_table()
+            sleep(configurations["delay_time_to_read_csv"])
 
     def thread_loop_write_csv(self):
         while True:
-            sleep(5)
+            sleep(configurations["delay_time_to_write_csv"])
             print(datetime.now())
             print(" write output vsc")
             self.set_out_csv_from_modbus_table()
             self.csv_out_engine.export_csv(main_threads.out_csv_path)
 
-    def get_in_csv_to_modbus_table(self):
+    def set_in_csv_to_modbus_table(self):
         # bus name
         for vocabulary in self.csv_in_engine.data["Bus"]:
             # print(vocabulary)
@@ -106,6 +117,72 @@ class Thread_Processing_Class():
         for vocabulary in self.csv_in_engine.data["2Winding transformer Data"]:
             # print(vocabulary)
             modbus_table.set_two_winding_data(
+                from_bus_number=    float(vocabulary["From_Bus_Number"]),
+                to_bus_number=      float(vocabulary["To_Bus_Number"]), 
+                Rpu=                float(vocabulary["R(pu)"]),
+                Xpu=                float(vocabulary["X(pu)"]),
+                winding_MVA_base=   float(vocabulary["Winding_MVA_Base"]),
+                status=             float(vocabulary["Status"])
+            )
+ 
+    def update_in_csv_to_modbus_table(self):
+        # bus name
+        for vocabulary in self.csv_in_engine.data["Bus"]:
+            # print(vocabulary)
+            modbus_table.change_bus(
+                bus_number= int(vocabulary["Bus Number"]),
+                bus_name=   str(vocabulary["Bus Name"])
+            )
+        # bus data
+        for vocabulary in self.csv_in_engine.data["Bus Data"]:
+            # print(vocabulary)
+            modbus_table.change_bus_data(
+                bus_number=     float(vocabulary["Bus_Number"]),
+                code=           float(vocabulary["Code"]),
+                udm=            float(vocabulary["Udm(pu)"]),
+                normal_vmax=    float(vocabulary["Normal_Vmax(pu)"]),
+                normal_vmin=    float(vocabulary["Normal_Vmin(pu)"]),
+                emergency_vmax= float(vocabulary["Emergency_Vmax(pu)"]),
+                emergency_vmin= float(vocabulary["Emergency_Vmin(pu)"]),
+                status=         float(vocabulary["Status"])
+            )
+        #  Gen Data
+        for vocabulary in self.csv_in_engine.data["Gen Data"]:
+            # print(vocabulary)
+            modbus_table.change_gen_data(
+                bus_number=     float(vocabulary["Bus_Number"]),
+                unit=           float(vocabulary["Unit"]),
+                pgen=           float(vocabulary["Pgen"]),
+                qgen=           float(vocabulary["Qgen"]),
+                status=         float(vocabulary["Status"])
+            )
+        # Line Data
+        for vocabulary in self.csv_in_engine.data["Line Data"]:
+            # print(vocabulary)
+            modbus_table.change_line_data(
+                from_bus_number=    float(vocabulary["From_Bus_Number"]),
+                to_bus_number=      float(vocabulary["To_Bus_Number"]),
+                ID=                 float(vocabulary["ID"]),
+                Imax=               float(vocabulary["Imax"]),
+                Rpu=                float(vocabulary["R(pu)"]),
+                Xpu=                float(vocabulary["X(pu)"]),
+                Gpu=                float(vocabulary["G(pu)"]),
+                Bpu=                float(vocabulary["B(pu)"]),
+                status=             float(vocabulary["Status"])
+            )
+        # Shunt data
+        for vocabulary in self.csv_in_engine.data["Shunt Data"]:
+            # print(vocabulary)
+            modbus_table.change_shunt_data(
+                bus_number= float(vocabulary["Bus_Number"]),
+                g_shunt=    float(vocabulary["G_Shunt(pu)"]),
+                b_shunt=    float(vocabulary["B_Shunt(pu)"]),
+                status=     float(vocabulary["Status"])
+            )
+        # 2Winding transformer Data
+        for vocabulary in self.csv_in_engine.data["2Winding transformer Data"]:
+            # print(vocabulary)
+            modbus_table.change_two_winding_data(
                 from_bus_number=    float(vocabulary["From_Bus_Number"]),
                 to_bus_number=      float(vocabulary["To_Bus_Number"]), 
                 Rpu=                float(vocabulary["R(pu)"]),
@@ -257,19 +334,4 @@ class Thread_Processing_Class():
                 vocabulary["Status"]            = str(two_winding_data_dict["Status"])
 
 if __name__ == '__main__':
-    main_threads = Thread_Processing_Class(
-        in_csv_path="a\savnw.csv",
-        out_csv_path= "savnw_out.csv"
-    )
-    # main_threads.csv_out_engine.data = main_threads.csv_in_engine.data
-    # main_threads.csv_out_engine.export_csv("export_data.csv")
-
-    # main_threads.get_in_csv_to_modbus_table()
-    # modbus_table.set_bus(101,"aaaaaaaaaaaaaa")
-    # modbus_table.set_bus_data(101,0,0,0,0,0,0,0)
-    # modbus_table.set_gen_data(101,1,1,1,1)
-    # modbus_table.set_line_data(151,152,1,1,1,1,1,1,1)
-    # modbus_table.set_shunt_data(151,1,1,1)
-    # modbus_table.set_two_winding_data(101,151,1,1,1,1)
-    # main_threads.set_out_csv_from_modbus_table()
-    # main_threads.csv_out_engine.export_csv(main_threads.out_csv_path)
+    main_threads = Thread_Processing_Class()
