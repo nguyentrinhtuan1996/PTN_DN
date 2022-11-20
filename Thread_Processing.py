@@ -267,7 +267,12 @@ class Thread_Processing_Class():
                 modbus_table.holding_registers_table[from_bus_number_address +3],
                 modbus_table.holding_registers_table[from_bus_number_address +2]
             )
-            line_data_dict = modbus_table.get_line_data(from_bus_number,to_bus_number)
+            ID = modbus_table.convert_to_real(
+                modbus_table.holding_registers_table[from_bus_number_address +5],
+                modbus_table.holding_registers_table[from_bus_number_address +4]
+
+            )
+            line_data_dict = modbus_table.get_line_data(from_bus_number,to_bus_number,ID)
             obj_count +=1
             
             # print("mod " +str(line_data_dict))

@@ -422,17 +422,20 @@ class Modbus_Table_Class(Convent_Engine_Class):
             line_data_address = self.LINE_DATA_START_INPUT_REG + count*self.LINE_DATA_FRAME_LENGTH
             from_bus_number_dict = self.convert_to_fp32(from_bus_number)
             to_bus_number_dict = self.convert_to_fp32(to_bus_number)
+            ID_dict = self.convert_to_fp32(ID)
 
             if( self.input_registers_table[line_data_address] == from_bus_number_dict["Second Byte"] and
                 self.input_registers_table[line_data_address +1] == from_bus_number_dict["First Byte"] and
                 self.input_registers_table[line_data_address +2] == to_bus_number_dict["Second Byte"] and
-                self.input_registers_table[line_data_address +3] == to_bus_number_dict["First Byte"]):
-                # change ID
-                ID_dict = self.convert_to_fp32(ID)
-                self.input_registers_table[line_data_address +4] = ID_dict["Second Byte"]
-                self.input_registers_table[line_data_address +5] = ID_dict["First Byte"]
-                self.holding_registers_table[line_data_address +4] = ID_dict["Second Byte"]
-                self.holding_registers_table[line_data_address +5] = ID_dict["First Byte"]
+                self.input_registers_table[line_data_address +3] == to_bus_number_dict["First Byte"] and
+                self.input_registers_table[line_data_address +4] == ID_dict["Second Byte"] and
+                self.input_registers_table[line_data_address +5] == ID_dict["First Byte"]):
+                # # change ID
+                # ID_dict = self.convert_to_fp32(ID)
+                # self.input_registers_table[line_data_address +4] = ID_dict["Second Byte"]
+                # self.input_registers_table[line_data_address +5] = ID_dict["First Byte"]
+                # self.holding_registers_table[line_data_address +4] = ID_dict["Second Byte"]
+                # self.holding_registers_table[line_data_address +5] = ID_dict["First Byte"]
                 # change Imax
                 Imax_dict = self.convert_to_fp32(Imax)
                 self.input_registers_table[line_data_address +6] = Imax_dict["Second Byte"]
@@ -842,17 +845,21 @@ class Modbus_Table_Class(Convent_Engine_Class):
         # if not found gen data
         return False
                 
-    def get_line_data(self, from_bus_number, to_bus_number):
+    def get_line_data(self, from_bus_number, to_bus_number, ID):
         for count in range(0, self.line_data_object_number):
             # calculate the address
             line_data_address = self.LINE_DATA_START_HOLDING_REG + count*self.LINE_DATA_FRAME_LENGTH
             from_bus_number_dict = self.convert_to_fp32(from_bus_number)
             to_bus_number_dict = self.convert_to_fp32(to_bus_number)
+            ID_dict = self.convert_to_fp32(ID)
+
             # if found this bus line data
             if( self.input_registers_table[line_data_address] == from_bus_number_dict["Second Byte"] and
                 self.input_registers_table[line_data_address +1] == from_bus_number_dict["First Byte"] and
                 self.input_registers_table[line_data_address +2] == to_bus_number_dict["Second Byte"] and
-                self.input_registers_table[line_data_address +3] == to_bus_number_dict["First Byte"]):
+                self.input_registers_table[line_data_address +3] == to_bus_number_dict["First Byte"]and
+                self.input_registers_table[line_data_address +4] == ID_dict["Second Byte"] and
+                self.input_registers_table[line_data_address +5] == ID_dict["First Byte"]):
                     line_data_dict = {}
                     # from_bus_number
                     line_data_dict["From_Bus_Number"] = self.convert_to_real(
@@ -1176,15 +1183,18 @@ class Modbus_Table_Class(Convent_Engine_Class):
             line_data_address = self.LINE_DATA_START_INPUT_REG + count*self.LINE_DATA_FRAME_LENGTH
             from_bus_number_dict = self.convert_to_fp32(from_bus_number)
             to_bus_number_dict = self.convert_to_fp32(to_bus_number)
+            ID_dict = self.convert_to_fp32(ID)
 
             if( self.input_registers_table[line_data_address] == from_bus_number_dict["Second Byte"] and
                 self.input_registers_table[line_data_address +1] == from_bus_number_dict["First Byte"] and
                 self.input_registers_table[line_data_address +2] == to_bus_number_dict["Second Byte"] and
-                self.input_registers_table[line_data_address +3] == to_bus_number_dict["First Byte"]):
+                self.input_registers_table[line_data_address +3] == to_bus_number_dict["First Byte"]and
+                self.input_registers_table[line_data_address +4] == ID_dict["Second Byte"] and
+                self.input_registers_table[line_data_address +5] == ID_dict["First Byte"]):
                 # change ID
-                ID_dict = self.convert_to_fp32(ID)
-                self.input_registers_table[line_data_address +4] = ID_dict["Second Byte"]
-                self.input_registers_table[line_data_address +5] = ID_dict["First Byte"]
+                # ID_dict = self.convert_to_fp32(ID)
+                # self.input_registers_table[line_data_address +4] = ID_dict["Second Byte"]
+                # self.input_registers_table[line_data_address +5] = ID_dict["First Byte"]
                 # self.holding_registers_table[line_data_address +4] = ID_dict["Second Byte"]
                 # self.holding_registers_table[line_data_address +5] = ID_dict["First Byte"]
                 # change Imax
