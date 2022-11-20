@@ -15,3 +15,5 @@ shunt_data      |   5500    -   6299    |   5500    -   6299
 2_winding_data  |   6300    -   7499    |   6300    -   7499
 
 With this user can config modbus table with IEC 104 server
+
+1) run the main

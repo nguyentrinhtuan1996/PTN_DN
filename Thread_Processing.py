@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from CSV_Engine import CSV_Engine_Class
 from Modbus_Server import Modbus_Server_Class, modbus_table
 import threading
