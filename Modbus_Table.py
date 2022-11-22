@@ -30,8 +30,8 @@ class Modbus_Table_Class(Convent_Engine_Class):
 
     # for bus object (11 x 2 byte) 
     bus_object_number = 0
-    BUS_NAME_MAX_LENGTH = 10
-    BUS_FRAME_LENGTH = 11
+    BUS_FRAME_LENGTH = 12
+    BUS_NAME_MAX_LENGTH = BUS_FRAME_LENGTH -1
 
     BUS_START_INPUT_REG = 0
     BUS_END_INPUT_REG   = QUANTITY_BUS*BUS_FRAME_LENGTH - 1

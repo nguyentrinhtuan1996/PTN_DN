@@ -58,7 +58,7 @@ class Thread_Processing_Class():
             print(datetime.now())
             print(" write output vsc")
             self.set_out_csv_from_modbus_table()
-            self.csv_out_engine.export_csv(main_threads.out_csv_path)
+            self.csv_out_engine.export_csv(self.out_csv_path)
 
     def set_in_csv_to_modbus_table(self):
         # bus name
