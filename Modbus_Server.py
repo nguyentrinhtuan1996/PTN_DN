@@ -98,10 +98,5 @@ if __name__ == '__main__':
     # modbus_table.set_bus_data(111,1,1.02 ,3.5 ,4.5 ,5.5 ,6.5 ,1)
     # modbus_table.set_bus_data(112,1,1.02 ,3.5 ,4.5 ,5.5 ,6.5 ,1)
     # modbus_table.set_bus_data(113,1,1.02 ,3.5 ,4.5 ,5.5 ,6.5 ,1)
-    # modbus_table.print_modbus_table()
-    # server = ModbusServer(host='0.0.0.0', port=args.port, data_bank=MyDataBank())
     
-    # print("Modbus server is online")
-    # server.start()
 
-# python data.py --host 0.0.0.0

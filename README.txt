@@ -8,8 +8,8 @@ the modbus table is list blow:
                 |   Input register      |   Holding register    | type          | Modbus TCP Server     | IEC 60870-5-104
 ------------------------------------------------------------------------------------------------------------------------------------
                 |   from    -   to      |   from    -   to      | bit string    |
-bus             |   0       -   1099    |   0       -   1099    | float         |12   Ir,HR             |   6 x bit sting 32 bit
-bus_data        |   1100    -   2699    |   1100    -   2699    | float         |16   Ir,HR             |   8 x measurement float
+bus             |   0       -   239    |   0       -   1099    | float         |12   Ir,HR             |   6 x bit sting 32 bit
+bus_data        |   240    -   2699    |   1100    -   2699    | float         |16   Ir,HR             |   8 x measurement float
 gen_data        |   2700    -   3699    |   2700    -   3699    | float         |10   Ir,HR             |   5 x measurement float
 line_data       |   3700    -   5499    |   3700    -   5499    | float         |18   Ir,HR             |   9 x measurement float
 shunt_data      |   5500    -   6299    |   5500    -   6299    | float         |8    Ir,HR             |   4 x measurement float

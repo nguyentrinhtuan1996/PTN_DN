@@ -21,7 +21,7 @@ class Thread_Processing_Class():
         self.out_csv_path = out_csv_path
         # CSV engine
         self.csv_in_engine = CSV_Engine_Class(self.in_csv_path)
-        self.csv_out_engine = CSV_Engine_Class(self.in_csv_path)
+        self.csv_out_engine = CSV_Engine_Class(self.out_csv_path)
         # import data from input csv
         self.csv_in_engine.import_csv()
         # self.csv_out_engine.import_csv()
@@ -41,6 +41,7 @@ class Thread_Processing_Class():
         self.modbus_server.start()
         self.thread_read_input_csv.start()
         self.thread_write_output_csv.start()
+        
     
     def thread_loop_read_csv(self):
         self.csv_in_engine.import_csv()
@@ -49,15 +50,18 @@ class Thread_Processing_Class():
             print(datetime.now())
             print(" Read input csv")
             self.csv_in_engine.import_csv()
-            self.update_in_csv_to_modbus_table()
-            sleep(configurations["delay_time_to_read_csv"])
+            self.set_in_csv_to_modbus_table()
+            # modbus_table.print_modbus_table()
+            # sleep(configurations["delay_time_to_read_csv"])
+            sleep(2)
 
     def thread_loop_write_csv(self):
         while True:
-            sleep(configurations["delay_time_to_write_csv"])
+            # sleep(configurations["delay_time_to_write_csv"])
+            sleep(2)
             print(datetime.now())
             print(" write output vsc")
-            self.set_out_csv_from_modbus_table()
+            # self.set_out_csv_from_modbus_table()
             self.csv_out_engine.export_csv(self.out_csv_path)
 
     def set_in_csv_to_modbus_table(self):
