@@ -62,6 +62,7 @@ shunt_data      |   1120    -   1279    |   1120    -   1279    | float         
     Log in mGate5114 and config the modbus client to read at IP, where user run this program
     Or check by qModbusMaster in tutorial
 ### 4.1) IOA of objects
+    1st Bus : Bitstring of 32bits at 0
     1st Bus Data: Measurement value(float) at 0
     1st Gen Data: Measurement value(float) at 160
     1st Line Data: Measurement value(float) at 260
