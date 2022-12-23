@@ -1,3 +1,4 @@
+# Modbus TCP - IEC 60870-5-104
 this code will read the csv,  convert it to context of modbus server and vice versa.
 there are 20 object for each bus, bus data, gen data, line data, shunt data, 2 winding data
 Each object will be create in input register for input csv and holding register for output
@@ -16,12 +17,11 @@ line_data       |   760     -   1119    |   760     -   1119    | float         
 shunt_data      |   1120    -   1279    |   1120    -   1279    | float         |8  x  Ir,HR            |   4 x measurement float
 2_winding_data  |   1280    -   1519    |   1280    -   1519    | float         |12 x  Ir,HR            |   6 x measurement float -->
 
-With this user can config modbus table with IEC 104 server
-# 1) Install lib
+## 1) Install lib
     pip install pyModbusTCP
-# 2) run the main.
+## 2) run the main.
     python3 main.py
-# 3) log in moxa and config (ConfigMoxa.docx).
+## 3) log in moxa and config (ConfigMoxa.docx).
     Modbus TCP client will read input register from 0 to last address with 
         last_address =    BUS_NAME_MAX_LENGTH           * max_quantity_bus
                         + BUS_DATA_FRAME_LENGTH         * max_quantity_bus_data
@@ -58,5 +58,12 @@ With this user can config modbus table with IEC 104 server
                         + SHUNT_DATA_FRAME_LENGTH   * max_quantity_shunt_data
                         + TWO_WINDING_DATA_FRAME_LENGTH * max_quantity_2_winding_data)
                         /2
-# 4) read and write.
-    
+## 4) read and write.
+    Log in mGate5114 and config the modbus client to read at IP, where user run this program
+    Or check by qModbusMaster in tutorial
+### 4.1) IOA of objects
+    1st Bus Data: Measurement value(float) at 0
+    1st Gen Data: Measurement value(float) at 160
+    1st Line Data: Measurement value(float) at 260
+    1st Shunt Data: Measurement value(float) at 440
+    1st 2 Winding Data: Measurement value(float) at 520
