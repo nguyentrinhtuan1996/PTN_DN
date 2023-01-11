@@ -52,16 +52,14 @@ class Thread_Processing_Class():
             self.csv_in_engine.import_csv()
             self.set_in_csv_to_modbus_table()
             # modbus_table.print_modbus_table()
-            # sleep(configurations["delay_time_to_read_csv"])
-            sleep(2)
+            sleep(configurations["delay_time_to_read_csv"])
 
     def thread_loop_write_csv(self):
         while True:
-            # sleep(configurations["delay_time_to_write_csv"])
-            sleep(2)
+            sleep(configurations["delay_time_to_write_csv"])
             print(datetime.now())
             print(" write output vsc")
-            # self.set_out_csv_from_modbus_table()
+            self.set_out_csv_from_modbus_table()
             self.csv_out_engine.export_csv(self.out_csv_path)
 
     def set_in_csv_to_modbus_table(self):
@@ -197,22 +195,20 @@ class Thread_Processing_Class():
             )
 
     def set_out_csv_from_modbus_table(self):
-
+        # print(self.csv_out_engine.data)
         # bus_name
-        obj_count = 0 
-        for vocabulary in self.csv_out_engine.data["Bus"]:
-            # print(vocabulary)
+        for obj_count in range(0, len(self.csv_out_engine.data["Bus"])):
+            # print(self.csv_out_engine.data["Bus"][obj_count])
             # calculate the bus number address
             bus_number_address = modbus_table.BUS_START_HOLDING_REG + obj_count*modbus_table.BUS_FRAME_LENGTH
             bus_number = modbus_table.holding_registers_table[bus_number_address]
             bus_name = modbus_table.get_bus_name(bus_number)
-            vocabulary["Bus Name"] = bus_name
-            obj_count +=1
+            self.csv_out_engine.data["Bus"][obj_count]["Bus Name"] = bus_name
+            # vocabulary["Bus Name"] = bus_name
             # print(bus_name)
 
-        # bus_data
-        obj_count = 0
-        for vocabulary in self.csv_out_engine.data["Bus Data"]:
+    
+        for obj_count in range(0, len(self.csv_out_engine.data["Bus Data"])):
             # print("vo "+str(vocabulary))
             # calculate the bus number address
             bus_number_address = modbus_table.BUS_DATA_START_HOLDING_REG + obj_count*modbus_table.BUS_DATA_FRAME_LENGTH
@@ -222,22 +218,21 @@ class Thread_Processing_Class():
                 modbus_table.holding_registers_table[bus_number_address ]
             )
             bus_data_dict = modbus_table.get_bus_data(bus_number)
-            obj_count +=1
             # write to out_csv.data
-            # print("mod "+str(bus_data_dict))
             if(bus_data_dict != False):
-                vocabulary["Bus_Number"] =            str(bus_data_dict["Bus_Number"])
-                vocabulary["Code"] =                  str(bus_data_dict["Code"])
-                vocabulary["Udm(pu)"] =               str(bus_data_dict["Udm"])
-                vocabulary["Normal_Vmax(pu)"] =       str(bus_data_dict["Normal_Vmax"])
-                vocabulary["Normal_Vmin(pu)"] =       str(bus_data_dict["Normal_Vmin"])
-                vocabulary["Emergency_Vmax(pu)"] =    str(bus_data_dict["Emergency_Vmax"])
-                vocabulary["Emergency_Vmin(pu)"] =    str(bus_data_dict["Emergency_Vmin"])
-                vocabulary["Status"] =                str(bus_data_dict["Status"])
+                self.csv_out_engine.data["Bus Data"][obj_count]["Bus_Number"] =            str(bus_data_dict["Bus_Number"])
+                self.csv_out_engine.data["Bus Data"][obj_count]["Code"] =                  str(bus_data_dict["Code"])
+                self.csv_out_engine.data["Bus Data"][obj_count]["Udm(pu)"] =               str(bus_data_dict["Udm"])
+                self.csv_out_engine.data["Bus Data"][obj_count]["Normal_Vmax(pu)"] =       str(bus_data_dict["Normal_Vmax"])
+                self.csv_out_engine.data["Bus Data"][obj_count]["Normal_Vmin(pu)"] =       str(bus_data_dict["Normal_Vmin"])
+                self.csv_out_engine.data["Bus Data"][obj_count]["Emergency_Vmax(pu)"] =    str(bus_data_dict["Emergency_Vmax"])
+                self.csv_out_engine.data["Bus Data"][obj_count]["Emergency_Vmin(pu)"] =    str(bus_data_dict["Emergency_Vmin"])
+                self.csv_out_engine.data["Bus Data"][obj_count]["Status"] =                str(bus_data_dict["Status"])
+            else:
+                print(bus_number, " : this bus number has be changed")
 
         # gen_data
-        obj_count = 0
-        for vocabulary in self.csv_out_engine.data["Gen Data"]:
+        for obj_count in range(0, len(self.csv_out_engine.data["Gen Data"])):
             # print("vo " +str(vocabulary))
             # calculate the bus number address
             bus_number_address = modbus_table.GEN_DATA_START_HOLDING_REG + obj_count*modbus_table.GEN_DATA_FRAME_LENGTH
@@ -247,19 +242,17 @@ class Thread_Processing_Class():
                 modbus_table.holding_registers_table[bus_number_address ]
             )
             gen_data_dict = modbus_table.get_gen_data(bus_number)
-            obj_count +=1
             # write to out_csv.data
             # print("mod "+str(gen_data_dict))
             if(gen_data_dict != False):
-                vocabulary["Bus_Number"] =  str(gen_data_dict["Bus_Number"])
-                vocabulary["Unit"] =        str(gen_data_dict["Unit"])
-                vocabulary["Pgen"] =        str(gen_data_dict["Pgen"])
-                vocabulary["Qgen"] =        str(gen_data_dict["Qgen"])
-                vocabulary["Status"] =      str(gen_data_dict["Status"])
+                self.csv_out_engine.data["Gen Data"][obj_count]["Bus_Number"] =  str(gen_data_dict["Bus_Number"])
+                self.csv_out_engine.data["Gen Data"][obj_count]["Unit"] =        str(gen_data_dict["Unit"])
+                self.csv_out_engine.data["Gen Data"][obj_count]["Pgen"] =        str(gen_data_dict["Pgen"])
+                self.csv_out_engine.data["Gen Data"][obj_count]["Qgen"] =        str(gen_data_dict["Qgen"])
+                self.csv_out_engine.data["Gen Data"][obj_count]["Status"] =      str(gen_data_dict["Status"])
 
         # line data
-        obj_count = 0
-        for vocabulary in self.csv_out_engine.data["Line Data"]:
+        for obj_count in range(0, len(self.csv_out_engine.data["Line Data"])):
             # print("vo " +str(vocabulary))
             # calculate the bus number address
             from_bus_number_address = modbus_table.LINE_DATA_START_HOLDING_REG + obj_count*modbus_table.LINE_DATA_FRAME_LENGTH
@@ -278,25 +271,20 @@ class Thread_Processing_Class():
 
             )
             line_data_dict = modbus_table.get_line_data(from_bus_number,to_bus_number,ID)
-            obj_count +=1
             
-            # print("mod " +str(line_data_dict))
-            # print("")
-
             if(line_data_dict !=False):
-                vocabulary["From_Bus_Number"] = str(line_data_dict["From_Bus_Number"])
-                vocabulary["To_Bus_Number"]   = str(line_data_dict["To_Bus_Number"])
-                vocabulary["ID"]              = str(line_data_dict["ID"])  
-                vocabulary["Imax"]            = str(line_data_dict["Imax"])
-                vocabulary["R(pu)"]           = str(line_data_dict["Rpu"])
-                vocabulary["X(pu)"]           = str(line_data_dict["Xpu"])
-                vocabulary["G(pu)"]           = str(line_data_dict["Gpu"])
-                vocabulary["B(pu)"]           = str(line_data_dict["Bpu"])
-                vocabulary["Status"]           = str(line_data_dict["Status"])
+                self.csv_out_engine.data["Line Data"][obj_count]["From_Bus_Number"] = str(line_data_dict["From_Bus_Number"])
+                self.csv_out_engine.data["Line Data"][obj_count]["To_Bus_Number"]   = str(line_data_dict["To_Bus_Number"])
+                self.csv_out_engine.data["Line Data"][obj_count]["ID"]              = str(line_data_dict["ID"])  
+                self.csv_out_engine.data["Line Data"][obj_count]["Imax"]            = str(line_data_dict["Imax"])
+                self.csv_out_engine.data["Line Data"][obj_count]["R(pu)"]           = str(line_data_dict["Rpu"])
+                self.csv_out_engine.data["Line Data"][obj_count]["X(pu)"]           = str(line_data_dict["Xpu"])
+                self.csv_out_engine.data["Line Data"][obj_count]["G(pu)"]           = str(line_data_dict["Gpu"])
+                self.csv_out_engine.data["Line Data"][obj_count]["B(pu)"]           = str(line_data_dict["Bpu"])
+                self.csv_out_engine.data["Line Data"][obj_count]["Status"]          = str(line_data_dict["Status"])
         
         #  shunt data 
-        obj_count = 0
-        for vocabulary in self.csv_out_engine.data["Shunt Data"]:
+        for obj_count in range(0, len(self.csv_out_engine.data["Shunt Data"])):
             # print("vo " +str(vocabulary))
             # calculate the bus number address
             bus_number_address = modbus_table.SHUNT_DATA_START_HOLDING_REG + obj_count*modbus_table.SHUNT_DATA_FRAME_LENGTH
@@ -306,17 +294,15 @@ class Thread_Processing_Class():
             )
             shunt_data_dict = modbus_table.get_shunt_data(bus_number)
             # print("mod " +str(shunt_data_dict))
-            obj_count +=1
             if(shunt_data_dict != False):
                 #  write to out csv data
-                vocabulary["Bus_Number"]    = str(shunt_data_dict["Bus_Number"])
-                vocabulary["G_Shunt(pu)"]   = str(shunt_data_dict["G_Shunt"])
-                vocabulary["B_Shunt(pu)"]   = str(shunt_data_dict["B_Shunt"])
-                vocabulary["Status"]        = str(shunt_data_dict["Status"])
+                self.csv_out_engine.data["Shunt Data"][obj_count]["Bus_Number"]    = str(shunt_data_dict["Bus_Number"])
+                self.csv_out_engine.data["Shunt Data"][obj_count]["G_Shunt(pu)"]   = str(shunt_data_dict["G_Shunt"])
+                self.csv_out_engine.data["Shunt Data"][obj_count]["B_Shunt(pu)"]   = str(shunt_data_dict["B_Shunt"])
+                self.csv_out_engine.data["Shunt Data"][obj_count]["Status"]        = str(shunt_data_dict["Status"])
 
         # 2 winding transformer data
-        obj_count = 0
-        for vocabulary in self.csv_out_engine.data["2Winding transformer Data"]:
+        for obj_count in range(0, len(self.csv_out_engine.data["2Winding transformer Data"])):
             # print("vo " +str(vocabulary))
             # calculate the addresses
             from_bus_number_address = modbus_table.TWO_WINDING_DATA_START_HOLDING_REG + obj_count*modbus_table.TWO_WINDING_DATA_FRAME_LENGTH
@@ -332,16 +318,19 @@ class Thread_Processing_Class():
                 from_bus_number,
                 to_bus_number
             )
-            obj_count +=1
             # print("mod " +str(two_winding_data_dict))
             if(two_winding_data_dict != False):
                 # write data to out csv data
-                vocabulary["From_Bus_Number"]   = str(two_winding_data_dict["From_Bus_Number"])
-                vocabulary["To_Bus_Number"]     = str(two_winding_data_dict["To_Bus_Number"])
-                vocabulary["R(pu)"]             = str(two_winding_data_dict["Rpu"])
-                vocabulary["X(pu)"]             = str(two_winding_data_dict["Xpu"])
-                vocabulary["Winding_MVA_Base"]  = str(two_winding_data_dict["Winding_MVA_Base"])
-                vocabulary["Status"]            = str(two_winding_data_dict["Status"])
+                self.csv_out_engine.data["2Winding transformer Data"][obj_count]["From_Bus_Number"]   = str(two_winding_data_dict["From_Bus_Number"])
+                self.csv_out_engine.data["2Winding transformer Data"][obj_count]["To_Bus_Number"]     = str(two_winding_data_dict["To_Bus_Number"])
+                self.csv_out_engine.data["2Winding transformer Data"][obj_count]["R(pu)"]             = str(two_winding_data_dict["Rpu"])
+                self.csv_out_engine.data["2Winding transformer Data"][obj_count]["X(pu)"]             = str(two_winding_data_dict["Xpu"])
+                self.csv_out_engine.data["2Winding transformer Data"][obj_count]["Winding_MVA_Base"]  = str(two_winding_data_dict["Winding_MVA_Base"])
+                self.csv_out_engine.data["2Winding transformer Data"][obj_count]["Status"]            = str(two_winding_data_dict["Status"])
+
+        # print("csv out engine data: ->")
+        # print(self.csv_out_engine.data)
+        # print("<-")
 
 if __name__ == '__main__':
     main_threads = Thread_Processing_Class()

@@ -145,8 +145,8 @@ class Modbus_Table_Class(Convent_Engine_Class):
                         self.input_registers_table[bus_number_address + count1 +1] = ord(bus_name[count1])
                         self.holding_registers_table[bus_number_address + count1 +1] = ord(bus_name[count1])
                     else:
-                        self.input_registers_table[bus_number_address + count1 +1] = 0
-                        self.holding_registers_table[bus_number_address + count1 +1] = 0
+                        self.input_registers_table[bus_number_address + count1 +1] = ord(" ")
+                        self.holding_registers_table[bus_number_address + count1 +1] = ord(" ")
 
                 # print(self.input_registers_table)
                 return True
