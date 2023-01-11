@@ -11,8 +11,14 @@ other requests return an illegal data address except.
 Run this as root to listen on TCP privileged ports (<= 1024).
 """
 
+import os
 import threading
-from pyModbusTCP.server import ModbusServer, DataBank
+try:
+    from pyModbusTCP.server import ModbusServer, DataBank
+except:
+    os.system("pip install pyModbusTCP")
+    from pyModbusTCP.server import ModbusServer, DataBank
+
 from Modbus_Table import Modbus_Table_Class
 # this global dic will be use by main
 modbus_table = Modbus_Table_Class()
