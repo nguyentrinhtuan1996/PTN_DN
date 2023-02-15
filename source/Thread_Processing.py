@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
+import os
 from CSV_Engine import CSV_Engine_Class
 from Modbus_Server import Modbus_Server_Class, modbus_table
 import threading
 from time import sleep
-from datetime import datetime
+try:
+    from datetime import datetime
+except:
+    os.system("pip install DateTimeRange")
 import json
 
 # Opening JSON file

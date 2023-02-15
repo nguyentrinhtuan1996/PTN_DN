@@ -1332,9 +1332,7 @@ class Modbus_Table_Class(Convent_Engine_Class):
                 # self.holding_registers_table[two_winding_data_address +11] = status_dict["First Byte"]
                 
                 return True
-        return False
-        
-
+        return False    
 if __name__ == '__main__':
     modbus_table = Modbus_Table_Class()
     # modbus_table.set_bus(101,'123345')
