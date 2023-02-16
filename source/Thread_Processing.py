@@ -46,10 +46,10 @@ class Thread_Processing_Class():
         self.thread_read_input_csv.start()
         self.thread_write_output_csv.start()
         
-    
     def thread_loop_read_csv(self):
         self.csv_in_engine.import_csv()
         self.set_in_csv_to_modbus_table()
+        
         while True:
             print(datetime.now())
             print(" Read input csv")
@@ -57,6 +57,7 @@ class Thread_Processing_Class():
             self.set_in_csv_to_modbus_table()
             # modbus_table.print_modbus_table()
             sleep(configurations["delay_time_to_read_csv"])
+        
 
     def thread_loop_write_csv(self):
         while True:
@@ -131,7 +132,33 @@ class Thread_Processing_Class():
                 winding_MVA_base=   float(vocabulary["Winding_MVA_Base"]),
                 status=             float(vocabulary["Status"])
             )
- 
+        # for load data
+        for vocabulary in self.csv_in_engine.data["Load Data"]:
+            print(vocabulary)
+            modbus_table.set_load_data(
+                bus_number= float(vocabulary["Bus"]),
+                P=          float(vocabulary["P"]),
+                Q=          float(vocabulary["Q"]),
+                ID=         float(vocabulary["ID"]),
+            )
+        # for load data
+        for vocabulary in self.csv_in_engine.data["Generic"]:
+            print(vocabulary)
+            modbus_table.set_generic(
+                field1= float(vocabulary["FIELD1"]),
+                field2= float(vocabulary["FIELD2"]),
+                field3= float(vocabulary["FIELD3"]),
+                field4= float(vocabulary["FIELD4"]),
+                field5= float(vocabulary["FIELD5"]),
+                field6= float(vocabulary["FIELD6"]),
+                field7= float(vocabulary["FIELD7"]),
+                field8= float(vocabulary["FIELD8"]),
+                field9= float(vocabulary["FIELD9"]),
+                field10= float(vocabulary["FIELD10"]),
+            )
+
+
+
     def update_in_csv_to_modbus_table(self):
         # bus name
         for vocabulary in self.csv_in_engine.data["Bus"]:
@@ -196,6 +223,30 @@ class Thread_Processing_Class():
                 Xpu=                float(vocabulary["X(pu)"]),
                 winding_MVA_base=   float(vocabulary["Winding_MVA_Base"]),
                 status=             float(vocabulary["Status"])
+            )
+        # for load data
+        for vocabulary in self.csv_in_engine.data["Load Data"]:
+            print(vocabulary)
+            modbus_table.change_load_data(
+                bus_number= float(vocabulary["Bus"]),
+                P=          float(vocabulary["P"]),
+                Q=          float(vocabulary["Q"]),
+                ID=         float(vocabulary["ID"]),
+            )
+        # for load data
+        for vocabulary in self.csv_in_engine.data["Generic"]:
+            print(vocabulary)
+            modbus_table.change_generic(
+                field1= float(vocabulary["FIELD1"]),
+                field2= float(vocabulary["FIELD2"]),
+                field3= float(vocabulary["FIELD3"]),
+                field4= float(vocabulary["FIELD4"]),
+                field5= float(vocabulary["FIELD5"]),
+                field6= float(vocabulary["FIELD6"]),
+                field7= float(vocabulary["FIELD7"]),
+                field8= float(vocabulary["FIELD8"]),
+                field9= float(vocabulary["FIELD9"]),
+                field10= float(vocabulary["FIELD10"]),
             )
 
     def set_out_csv_from_modbus_table(self):
@@ -336,5 +387,46 @@ class Thread_Processing_Class():
         # print(self.csv_out_engine.data)
         # print("<-")
 
+        # for load data
+        for obj_count in range(0, len(self.csv_out_engine.data["Load Data"])):
+            bus_number_address = modbus_table.LOAD_DATA_START_HOLDING_REG + obj_count*modbus_table.LOAD_DATA_FRAME_LENGTH
+            bus_number = modbus_table.convert_to_real(
+                modbus_table.holding_registers_table[bus_number_address +1],
+                modbus_table.holding_registers_table[bus_number_address ]
+            )
+            load_data_dict = modbus_table.get_load_data(bus_number)
+            if (load_data_dict != False):
+                self.csv_out_engine.data["Load Data"][obj_count]["Bus"] = str(load_data_dict["Bus"])
+                self.csv_out_engine.data["Load Data"][obj_count]["P"] = str(load_data_dict["P"])
+                self.csv_out_engine.data["Load Data"][obj_count]["Q"] = str(load_data_dict["Q"])
+                self.csv_out_engine.data["Load Data"][obj_count]["ID"] = str(load_data_dict["ID"])
+                # print(self.csv_out_engine.data["Load Data"][obj_count])
+
+        # for generic
+        for obj_count in range(0, len(self.csv_out_engine.data["Generic"])):
+            field1_address = modbus_table.GENERIC_START_HOLDING_REG + obj_count*modbus_table.GENERIC_FRAME_LENGTH
+            field1 = modbus_table.convert_to_real(
+                modbus_table.holding_registers_table[field1_address +1],
+                modbus_table.holding_registers_table[field1_address ]
+            )
+            field2 = modbus_table.convert_to_real(
+                modbus_table.holding_registers_table[field1_address +3],
+                modbus_table.holding_registers_table[field1_address +2]
+            )
+
+            generic_dict = modbus_table.get_generic(field1,field2)
+            if (generic_dict != False):
+                self.csv_out_engine.data["Generic"][obj_count]["FIELD1"] = str(generic_dict["Field1"])
+                self.csv_out_engine.data["Generic"][obj_count]["FIELD2"] = str(generic_dict["Field2"])
+                self.csv_out_engine.data["Generic"][obj_count]["FIELD3"] = str(generic_dict["Field3"])
+                self.csv_out_engine.data["Generic"][obj_count]["FIELD4"] = str(generic_dict["Field4"])
+                self.csv_out_engine.data["Generic"][obj_count]["FIELD5"] = str(generic_dict["Field5"])
+                self.csv_out_engine.data["Generic"][obj_count]["FIELD6"] = str(generic_dict["Field6"])
+                self.csv_out_engine.data["Generic"][obj_count]["FIELD7"] = str(generic_dict["Field7"])
+                self.csv_out_engine.data["Generic"][obj_count]["FIELD8"] = str(generic_dict["Field8"])
+                self.csv_out_engine.data["Generic"][obj_count]["FIELD9"] = str(generic_dict["Field9"])
+                self.csv_out_engine.data["Generic"][obj_count]["FIELD10"] = str(generic_dict["Field10"])
+                print(self.csv_out_engine.data["Generic"][obj_count])
+        
 if __name__ == '__main__':
     main_threads = Thread_Processing_Class()

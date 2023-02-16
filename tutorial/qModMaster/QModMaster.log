@@ -456,3 +456,4 @@ ERROR 2022-12-23T11:25:24.792 ..\..\qModMaster\src\modbusadapter.cpp @ 291 Read 
 ERROR 2022-12-23T11:25:25.787 ..\..\qModMaster\src\modbusadapter.cpp @ 291 Read Data failed.  "Error : No error" 
 ERROR 2023-02-15T14:00:41.978 ..\..\qModMaster\src\modbusadapter.cpp @ 136 Connection to IP :  "192.168.001.010" : 502 ...failed. Could not connect to TCP port 
  WARN 2023-02-15T14:02:52.595 ..\..\qModMaster\src\mainwindow.cpp @ 164 RTU settings changes rejected  
+ERROR 2023-02-16T16:18:38.638 ..\..\qModMaster\src\modbusadapter.cpp @ 291 Read Data failed.  "Error : No error" 

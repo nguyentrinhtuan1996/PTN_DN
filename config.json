@@ -1,12 +1,15 @@
 {
     "in_csv_path"               :"file/savnw.csv",
     "out_csv_path"              :"file/savnw_out.csv",
-    "delay_time_to_read_csv"    :30,
-    "delay_time_to_write_csv"   :3,
-    "max_quantity_bus"          :100,
-    "max_quantity_bus_data"     :30,
-    "max_quantity_gen_data"     :30,
-    "max_quantity_line_data"    :30,
-    "max_quantity_shunt_data"   :30,
-    "max_quantity_2_winding_data":30
+    "delay_time_to_read_csv"        :30,
+    "delay_time_to_write_csv"       :3,
+    "max_quantity_bus"              :100,
+    "max_quantity_bus_data"         :30,
+    "max_quantity_gen_data"         :30,
+    "max_quantity_line_data"        :30,
+    "max_quantity_shunt_data"       :30,
+    "max_quantity_2_winding_data"   :30,
+    "max_quantity_load_data"        :30,
+    "max_quantity_generic"         :30
+
 }
