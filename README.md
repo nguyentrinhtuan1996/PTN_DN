@@ -11,6 +11,7 @@ the modbus table is list blow:
 ------------------------------------------------------------------------------------------------------------------------------------
                 |   start   -   end     |   from    -   to      | bit string    |
 bus             |   0       -   239     |   0       -   239     | float         |12 x  Ir,HR            |   6 x bit sting 32 bit
+
 bus_data        |   240     -   559     |   240     -   559     | float         |16 x  Ir,HR            |   8 x measurement float
 gen_data        |   560     -   759     |   560     -   759     | float         |10 x  Ir,HR            |   5 x measurement float
 line_data       |   760     -   1119    |   760     -   1119    | float         |18 x  Ir,HR            |   9 x measurement float

@@ -815,19 +815,17 @@ class Modbus_Table_Class(Convent_Engine_Class):
         for count in range(0, self.generic_object_number):
             # calculate address of 2winding_data
             generic_address = self.GENERIC_START_INPUT_REG + count*self.GENERIC_FRAME_LENGTH
-            from_bus_number_dict = self.convert_to_fp32(field1)
-            to_bus_number_dict = self.convert_to_fp32(field2)
+            field1_dict = self.convert_to_fp32(field1)
+            field2_dict = self.convert_to_fp32(field2)
+            field3_dict = self.convert_to_fp32(field3)
 
-            if( self.input_registers_table[generic_address] == from_bus_number_dict["Second Byte"] and
-                self.input_registers_table[generic_address +1] == from_bus_number_dict["First Byte"] and
-                self.input_registers_table[generic_address +2] == to_bus_number_dict["Second Byte"] and
-                self.input_registers_table[generic_address +3] == to_bus_number_dict["First Byte"]):
-                # field 3
-                Rpu_dict = self.convert_to_fp32(field3)
-                self.input_registers_table[generic_address +4] = Rpu_dict["Second Byte"]
-                self.input_registers_table[generic_address +5] = Rpu_dict["First Byte"]
-                self.holding_registers_table[generic_address +4] = Rpu_dict["Second Byte"]
-                self.holding_registers_table[generic_address +5] = Rpu_dict["First Byte"]
+            if( self.input_registers_table[generic_address] == field1_dict["Second Byte"] and
+                self.input_registers_table[generic_address +1] == field1_dict["First Byte"] and
+                self.input_registers_table[generic_address +2] == field2_dict["Second Byte"] and
+                self.input_registers_table[generic_address +3] == field2_dict["First Byte"] and
+                self.input_registers_table[generic_address +4] == field3_dict["Second Byte"] and
+                self.input_registers_table[generic_address +5] == field3_dict["First Byte"] ):
+
                # field 4
                 Xpu_dict = self.convert_to_fp32(field4)
                 self.input_registers_table[generic_address +6] = Xpu_dict["Second Byte"]
@@ -1264,17 +1262,20 @@ class Modbus_Table_Class(Convent_Engine_Class):
         # if not found gen data
         return False
     
-    def get_generic(self,field1 = None, field2=None):
+    def get_generic(self,field1 = None, field2=None, field3 = None):
         for count in range(0, self.generic_object_number):
             # calculate the address
             generic_address = self.GENERIC_START_HOLDING_REG + count*self.GENERIC_FRAME_LENGTH
             field1_dict = self.convert_to_fp32(field1)
             field2_dict = self.convert_to_fp32(field2)
+            field3_dict = self.convert_to_fp32(field3)
             # if found this twp winding data
-            if( self.input_registers_table[generic_address]    == field1_dict["Second Byte"] and
+            if( self.input_registers_table[generic_address] == field1_dict["Second Byte"] and
                 self.input_registers_table[generic_address +1] == field1_dict["First Byte"] and
                 self.input_registers_table[generic_address +2] == field2_dict["Second Byte"] and
-                self.input_registers_table[generic_address +3] == field2_dict["First Byte"]):
+                self.input_registers_table[generic_address +3] == field2_dict["First Byte"] and
+                self.input_registers_table[generic_address +4] == field3_dict["Second Byte"] and
+                self.input_registers_table[generic_address +5] == field3_dict["First Byte"]):
 
                 generic_dict = {}
                 generic_dict["Field1"] = self.convert_to_real(
@@ -1707,19 +1708,16 @@ class Modbus_Table_Class(Convent_Engine_Class):
         for count in range(0, self.generic_object_number):
             # calculate address of 2winding_data
             generic_address = self.GENERIC_START_INPUT_REG + count*self.GENERIC_FRAME_LENGTH
-            from_bus_number_dict = self.convert_to_fp32(field1)
-            to_bus_number_dict = self.convert_to_fp32(field2)
+            field1_dict = self.convert_to_fp32(field1)
+            field2_dict = self.convert_to_fp32(field2)
+            field3_dict = self.convert_to_fp32(field3)
 
-            if( self.input_registers_table[generic_address] == from_bus_number_dict["Second Byte"] and
-                self.input_registers_table[generic_address +1] == from_bus_number_dict["First Byte"] and
-                self.input_registers_table[generic_address +2] == to_bus_number_dict["Second Byte"] and
-                self.input_registers_table[generic_address +3] == to_bus_number_dict["First Byte"]):
-                # field 3
-                Rpu_dict = self.convert_to_fp32(field3)
-                self.input_registers_table[generic_address +4] = Rpu_dict["Second Byte"]
-                self.input_registers_table[generic_address +5] = Rpu_dict["First Byte"]
-                self.holding_registers_table[generic_address +4] = Rpu_dict["Second Byte"]
-                self.holding_registers_table[generic_address +5] = Rpu_dict["First Byte"]
+            if( self.input_registers_table[generic_address] == field1_dict["Second Byte"] and
+                self.input_registers_table[generic_address +1] == field1_dict["First Byte"] and
+                self.input_registers_table[generic_address +2] == field2_dict["Second Byte"] and
+                self.input_registers_table[generic_address +3] == field2_dict["First Byte"] and
+                self.input_registers_table[generic_address +4] == field3_dict["Second Byte"] and
+                self.input_registers_table[generic_address +5] == field3_dict["First Byte"] ):
                # field 4
                 Xpu_dict = self.convert_to_fp32(field4)
                 self.input_registers_table[generic_address +6] = Xpu_dict["Second Byte"]
@@ -1795,11 +1793,11 @@ if __name__ == '__main__':
         field9=9,
         field10=10,
     )
-    print(modbus_table.get_generic(1,2))
+    print(modbus_table.get_generic(1,2,3))
     modbus_table.set_generic(
         field1=1,
         field2=2,
-        field3=11,
+        field3=3,
         field4=11,
         field5=11,
         field6=11,
@@ -1808,7 +1806,7 @@ if __name__ == '__main__':
         field9=11,
         field10=11,
     )
-    print(modbus_table.get_generic(1,2))
+    print(modbus_table.get_generic(1,2,3))
 
     # for count in range(3360,3390):
     #     print(modbus_table.input_registers_table[count])

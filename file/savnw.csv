@@ -24,7 +24,7 @@
 1,3011,MINE_G,,,,,,,,
 1,3018,CATDOG_G,,,,,,,,
 0,Bus_Data (Bus_Number, Code, Udm(pu), Normal_Vmax(pu), Normal_Vmin(pu), Emergency_Vmax(pu), Emergency_Vmin(pu), Status),,
-2,100,2,2,2,2,2,2,1,,
+2,100,0.1,0.2,0.1,2,2,2,1,,
 2,102,2,21.6,1.1,0.9,1.1,0.9,1,,
 2,151,1,500,1.1,0.9,1.1,0.9,1,,
 2,152,1,500,1.1,0.9,1.1,0.9,1,,
@@ -101,4 +101,4 @@
 7,152,4,2,1,,,,,,
 0,Generic (FIELD1,FIELD2,FIELD3,FIELD4,FIELD5,FIELD6,FIELD7,FIELD8,FIELD9,FIELD10)
 8,1,2,3,4,5,6,7,8,9,10
-8,1,20,3,4,5,6,7,8,9,10
+8,1,20,3,4,5,6,7,8,9,101

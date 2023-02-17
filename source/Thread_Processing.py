@@ -55,10 +55,10 @@ class Thread_Processing_Class():
             print(" Read input csv")
             self.csv_in_engine.import_csv()
             self.set_in_csv_to_modbus_table()
-            # modbus_table.print_modbus_table()
+            modbus_table.print_modbus_table()
+            # print(self.csv_in_engine.data["Generic"])
             sleep(configurations["delay_time_to_read_csv"])
         
-
     def thread_loop_write_csv(self):
         while True:
             sleep(configurations["delay_time_to_write_csv"])
@@ -156,8 +156,6 @@ class Thread_Processing_Class():
                 field9= float(vocabulary["FIELD9"]),
                 field10= float(vocabulary["FIELD10"]),
             )
-
-
 
     def update_in_csv_to_modbus_table(self):
         # bus name
@@ -413,8 +411,12 @@ class Thread_Processing_Class():
                 modbus_table.holding_registers_table[field1_address +3],
                 modbus_table.holding_registers_table[field1_address +2]
             )
+            field3 = modbus_table.convert_to_real(
+                modbus_table.holding_registers_table[field1_address +5],
+                modbus_table.holding_registers_table[field1_address +4]
+            )
 
-            generic_dict = modbus_table.get_generic(field1,field2)
+            generic_dict = modbus_table.get_generic(field1,field2,field3)
             if (generic_dict != False):
                 self.csv_out_engine.data["Generic"][obj_count]["FIELD1"] = str(generic_dict["Field1"])
                 self.csv_out_engine.data["Generic"][obj_count]["FIELD2"] = str(generic_dict["Field2"])
@@ -426,7 +428,7 @@ class Thread_Processing_Class():
                 self.csv_out_engine.data["Generic"][obj_count]["FIELD8"] = str(generic_dict["Field8"])
                 self.csv_out_engine.data["Generic"][obj_count]["FIELD9"] = str(generic_dict["Field9"])
                 self.csv_out_engine.data["Generic"][obj_count]["FIELD10"] = str(generic_dict["Field10"])
-                print(self.csv_out_engine.data["Generic"][obj_count])
+                # print(self.csv_out_engine.data["Generic"][obj_count])
         
 if __name__ == '__main__':
     main_threads = Thread_Processing_Class()
