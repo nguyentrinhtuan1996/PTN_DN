@@ -3,14 +3,14 @@
     "out_csv_path"              :"file/savnw_out.csv",
     "delay_time_to_read_csv"        :30,
     "delay_time_to_write_csv"       :3,
-    "max_quantity_bus"              :100,
+    "max_quantity_bus"              :1,
     
-    "max_quantity_bus_data"         :20,
-    "max_quantity_gen_data"         :20,
-    "max_quantity_line_data"        :20,
-    "max_quantity_shunt_data"       :20,
-    "max_quantity_2_winding_data"   :20,
-    "max_quantity_load_data"        :20,
-    "max_quantity_generic"          :20
+    "max_quantity_bus_data"         :1,
+    "max_quantity_gen_data"         :1,
+    "max_quantity_line_data"        :1,
+    "max_quantity_shunt_data"       :1,
+    "max_quantity_2_winding_data"   :1,
+    "max_quantity_load_data"        :1,
+    "max_quantity_generic"          :100
 
 }

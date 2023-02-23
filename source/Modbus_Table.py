@@ -876,9 +876,9 @@ class Modbus_Table_Class(Convent_Engine_Class):
 
         # field 1
         Rpu_dict = self.convert_to_fp32(field1)
-        self.input_registers_table[generic_address +0] = Rpu_dict["Second Byte"]
+        self.input_registers_table[generic_address ] = Rpu_dict["Second Byte"]
         self.input_registers_table[generic_address +1] = Rpu_dict["First Byte"]
-        self.holding_registers_table[generic_address +0] = Rpu_dict["Second Byte"]
+        self.holding_registers_table[generic_address ] = Rpu_dict["Second Byte"]
         self.holding_registers_table[generic_address +1] = Rpu_dict["First Byte"]
         # field 2
         Rpu_dict = self.convert_to_fp32(field2)

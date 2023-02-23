@@ -428,7 +428,7 @@ class Thread_Processing_Class():
                 self.csv_out_engine.data["Generic"][obj_count]["FIELD8"] = str(generic_dict["Field8"])
                 self.csv_out_engine.data["Generic"][obj_count]["FIELD9"] = str(generic_dict["Field9"])
                 self.csv_out_engine.data["Generic"][obj_count]["FIELD10"] = str(generic_dict["Field10"])
-                # print(self.csv_out_engine.data["Generic"][obj_count])
+                print(self.csv_out_engine.data["Generic"][obj_count])
         
 if __name__ == '__main__':
     main_threads = Thread_Processing_Class()
