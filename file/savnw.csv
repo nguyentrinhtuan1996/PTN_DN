@@ -1,4 +1,4 @@
-0,(0:Comment) (1: Bus) (2: Bus Data) (3: Gen Data) (4: Line Data) (5: Shunt Data) (6: 2Winding transformer Data) (7: Load Data) (8: Generic),,,,,,,,,
+0,(0:Comment) (1: Bus) (2: Bus Data) (3: Gen Data) (4: Line Data) (5: Shunt Data) (6: 2Winding transformer Data) (7: Load Data) (8: Generic),,2,,,,,,,
 0,Bus (Bus Number,Bus Name),,,,,,,,
 1,0,0,,,,,,,,
 0,Bus_Data (Bus_Number, Code, Udm(pu), Normal_Vmax(pu), Normal_Vmin(pu), Emergency_Vmax(pu), Emergency_Vmin(pu), Status),,
@@ -51,4 +51,4 @@
 8,6,121,201,45.07,14.09,63.0,2,3,0,0
 8,6,122,202,45.07,14.09,63.0,2,3,0,0
 8,7,201,45.0,20.0,1,2,0,0,0,0
-8,7,202,45.1,21.0,1,2,0,0,0,0
+8,7,202,2,2,2,2,2,2,2,2

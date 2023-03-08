@@ -26,6 +26,7 @@ class Thread_Processing_Class():
         # CSV engine
         self.csv_in_engine = CSV_Engine_Class(self.in_csv_path)
         self.csv_out_engine = CSV_Engine_Class(self.out_csv_path)
+
         # import data from input csv
         self.csv_in_engine.import_csv()
         # self.csv_out_engine.import_csv()
@@ -54,9 +55,12 @@ class Thread_Processing_Class():
             print(datetime.now())
             print(" Read input csv")
             self.csv_in_engine.import_csv()
+            self.csv_out_engine.data = self.csv_in_engine.data
             self.set_in_csv_to_modbus_table()
-            modbus_table.print_modbus_table()
-            # print(self.csv_in_engine.data["Generic"])
+            
+            # self.csv_out_engine.import_csv()
+            # modbus_table.print_modbus_table()
+            
             sleep(configurations["delay_time_to_read_csv"])
         
     def thread_loop_write_csv(self):
@@ -141,7 +145,7 @@ class Thread_Processing_Class():
                 Q=          float(vocabulary["Q"]),
                 ID=         float(vocabulary["ID"]),
             )
-        # for load data
+        # for generic data
         for vocabulary in self.csv_in_engine.data["Generic"]:
             print(vocabulary)
             modbus_table.set_generic(
